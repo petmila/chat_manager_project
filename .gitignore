@@ -1,0 +1,15 @@
+
+/chat_manager/.idea
+chat_manager/.env
+/chat_manager/chat_manager/__pycache__
+/chat_manager/llm_models/__pycache__
+/chat_manager/manager_app/__pycache__
+/chat_manager/manager_app/migrations/__pycache__
+/telegram_bot/.idea
+/telegram_bot/tbot_app/handlers/__pycache__
+/telegram_bot/tbot_app/__pycache__
+telegram_bot/.env
+/chat_manager/manager_app/migrations
+/chat_manager/manager_app/migrations
+/chat_manager/manager_app/migrations
+/chat_manager/manager_app/migrations
