@@ -8,6 +8,7 @@ router = Router()
 @router.message(Command("chat_summary"))
 async def make_summary_command(message: types.Message):
     data = await post_summary(session=session, data={"source_chat_id": message.chat.id})
+    print(data)
     await message.reply(f'{data}')
 #
 # @router.message(Command("chat_summary"))

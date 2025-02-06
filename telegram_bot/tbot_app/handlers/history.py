@@ -22,7 +22,6 @@ async def upload_history_command(message: types.Message):
                                      chat_title=message.chat.title)
         for message_ in history:
             post = await post_message(session, message_)
-            print(post)
         await message.reply(f'{message.document} вот что было передано в аргументах')
     except BaseException as e:
         print(e.args)

@@ -7,11 +7,6 @@ class ChatSerializer(serializers.ModelSerializer):
         model = models.Chat
         fields = ['id', 'chat_source', 'source_chat_id', 'name']
 
-#
-# class HashTagSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = models.HashTag
-#         fields = ['id', 'name', 'description', 'timeout']
 
 class SlugRelatedGetOrCreateField(serializers.SlugRelatedField):
     def to_internal_value(self, data):
@@ -48,19 +43,11 @@ class ModelResponseSerializer(serializers.ModelSerializer):
         model = models.ModelResponse
         fields = ['id', 'date', 'chat', 'text']
 
-#
-# class NoteSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = models.Note
-#         fields = ['id', '']
-
 class MessageSerializer(serializers.ModelSerializer):
     employee_account = SlugRelatedGetOrCreateField(
         many=False,
         queryset=models.EmployeeAccount.objects.all(),
         slug_field='nickname'
-        # source='employee_account.nickname'
-        # slug_field='nickname'
     )
     chat = SlugRelatedGetOrCreateField(
         many=False,

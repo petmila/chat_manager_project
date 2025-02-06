@@ -1,7 +1,5 @@
 import datetime
 from django.db import models
-from pgvector.django import VectorField
-
 
 class ChatSource(models.TextChoices):
     telegram = 'Telegram', 'telegram'
@@ -18,29 +16,6 @@ class Employee(models.Model):
     surname = models.CharField(verbose_name="Surname", max_length=200, null=True)
     accounts = models.ForeignKey(EmployeeAccount, on_delete=models.CASCADE, null=True)
 
-# class ContextEmbedding(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     date = models.DateTimeField()
-#     embedding = VectorField(
-#         dimensions=768,
-#         help_text="Vector embeddings of the file content",
-#         null=True,
-#         blank=True,
-#     )
-
-
-    # answer_to = (timestamp, employee)
-
-# class ChatContext(models.Model):
-#     last_update = models.DateTimeField()
-#     messages = models.ForeignKey(Message, on_delete=models.CASCADE)
-    # embeddings = models.ForeignKey(ContextEmbedding, on_delete=models.CASCADE)
-
-
-# class HashTag(models.Model):
-#     name = models.CharField(verbose_name="Name", max_length=200)
-#     description = models.CharField(verbose_name="Description", max_length=200)
-#     timeout = models.DurationField(verbose_name="Timeout")
 
 class ModelResponseStrategy(models.Model):
     strategy_name = models.CharField(verbose_name="Name", max_length=200)
@@ -59,8 +34,6 @@ class Chat(models.Model):
     source_chat_id = models.CharField(verbose_name="Source Chat ID", max_length=200, null=True, unique=True)
     chat_source = models.CharField(choices=ChatSource, max_length=20, default=ChatSource.telegram)
     name = models.CharField(verbose_name="Name", max_length=200)
-    # context = models.OneToOneField(ChatContext, on_delete=models.CASCADE)
-    # employees = models.ManyToManyField(Employee)
     generation_settings = models.ForeignKey(GenerationSettings, on_delete=models.CASCADE, null=True)
 
 class Message(models.Model):
@@ -82,12 +55,3 @@ class ModelResponse(models.Model):
     date = models.DateField(verbose_name="time", default=datetime.date.today)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     response_strategy = models.ForeignKey(ModelResponseStrategy, on_delete=models.CASCADE, null=True)
-
-
-# class Note(models.Model):
-#     creation_date = models.DateTimeField()
-#     notification_date = models.DateTimeField()
-#     hashtag = models.ForeignKey(HashTag, on_delete=models.CASCADE)
-#     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-#     text = models.TextField(verbose_name="text")
-#     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)

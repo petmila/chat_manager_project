@@ -1,4 +1,5 @@
 import json
+import pathlib
 
 
 def parse_chat_history(downloaded_file: bytes, file_path, source_chat_id, chat_title):
@@ -8,7 +9,10 @@ def parse_chat_history(downloaded_file: bytes, file_path, source_chat_id, chat_t
         d = json.load(f)
         for message in d['messages']:
             if message['type'] == 'message':
-                data = {'text': message['text'], 'timestamp': message['date'],
+                text = message['text']
+                if isinstance(text, list):
+                    text = ''.join([t if isinstance(t, str) else t['text'] for t in text])
+                data = {'text': text, 'timestamp': message['date'],
                         'employee_account': {
                             'nickname': message['from'],
                             'source': 'Telegram'},
@@ -18,5 +22,7 @@ def parse_chat_history(downloaded_file: bytes, file_path, source_chat_id, chat_t
                             'name': chat_title,
                         }}
                 yield data
+    file_to_rem = pathlib.Path(file_path)
+    file_to_rem.unlink()
 
 
