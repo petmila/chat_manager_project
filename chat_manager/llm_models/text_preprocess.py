@@ -4,6 +4,7 @@ import nltk
 from nltk import SnowballStemmer, word_tokenize
 from nltk.corpus import stopwords
 
+
 def preprocess(text):
     """
     Проводит лемматизацию, удаляет знаки препинания, стоп-слова
