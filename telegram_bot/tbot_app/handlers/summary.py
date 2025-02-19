@@ -45,7 +45,8 @@ def html_validation(html_string):
 
 @router.callback_query(F.data == "today_summary")
 async def summary_for_today_handler(callback: types.CallbackQuery):
-    summary = await summary_request(session, callback.message.chat.id, datetime.today(), datetime.today() + timedelta(days=1))
+    date_ = datetime.today().replace(hour=0, minute=0, second=0)
+    summary = await summary_request(session, callback.message.chat.id, date_, date_ + timedelta(days=1))
     if html_validation(summary):
         await callback.message.reply(summary, parse_mode=ParseMode.HTML)
     else:
@@ -54,8 +55,9 @@ async def summary_for_today_handler(callback: types.CallbackQuery):
 
 @router.callback_query(F.data == "yesterday_summary")
 async def summary_for_yesterday_handler(callback: types.CallbackQuery):
+    date_ = datetime.today().replace(hour=0, minute=0, second=0)
     summary = await summary_request(session, callback.message.chat.id,
-                                    first_date=datetime.today() - timedelta(days=1), last_date=datetime.today() + timedelta(days=1))
+                                    first_date=date_ - timedelta(days=1), last_date=date_ + timedelta(days=1))
     if html_validation(summary):
         await callback.message.reply(summary, parse_mode=ParseMode.HTML)
     else:
@@ -64,8 +66,9 @@ async def summary_for_yesterday_handler(callback: types.CallbackQuery):
 
 @router.callback_query(F.data == "this_week_summary")
 async def summary_for_week_handler(callback: types.CallbackQuery):
+    date_ = datetime.today().replace(hour=0, minute=0, second=0)
     summary = await summary_request(session, callback.message.chat.id,
-                                    first_date=datetime.today() - timedelta(days=7), last_date=datetime.today() + timedelta(days=1))
+                                    first_date=date_ - timedelta(days=7), last_date=date_ + timedelta(days=1))
     if html_validation(summary):
         await callback.message.reply(summary, parse_mode=ParseMode.HTML)
     else:

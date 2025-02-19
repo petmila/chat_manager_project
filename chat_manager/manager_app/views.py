@@ -58,6 +58,7 @@ class ModelResponseListView(generics.ListCreateAPIView):
         first_date = request.data['first_date']
         last_date = request.data['last_date']
         chat = models.Chat.objects.filter(source_chat_id=request.data['source_chat_id']).first()
+
         messages = models.Message.objects.filter(chat=chat, timestamp__range=(first_date, last_date)).order_by('timestamp')
         queryset = [
             str(message)
@@ -74,7 +75,7 @@ class ModelResponseListView(generics.ListCreateAPIView):
         #
         #
         data = {
-            # 'text': result,
+            'text': '-'.join(queryset),
             'date': datetime.date.today(), 'chat': chat.id}
         # serializer = serializers.ModelResponseSerializer(data=data)
         # try:

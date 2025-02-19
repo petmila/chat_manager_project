@@ -5,10 +5,6 @@ class ChatSource(models.TextChoices):
     telegram = 'Telegram', 'telegram'
     mattermost = 'Mattermost', 'mattermost'
 
-class PrivateChatSettings(models.Model):
-    frequency = models.DurationField(verbose_name="Frequency")
-    timestamp = models.TimeField(verbose_name="Time")
-
 class GenerationSettings(models.Model):
     frequency = models.DurationField(verbose_name="Frequency")
     timestamp = models.TimeField(verbose_name="Time")
@@ -62,3 +58,13 @@ class ModelResponse(models.Model):
     date = models.DateField(verbose_name="time", default=datetime.date.today)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     response_strategy = models.ForeignKey(ModelResponseStrategy, on_delete=models.CASCADE, null=True)
+
+# class TaskSchedule(models.Model):
+#     chat_for_summary = models.ForeignKey(Chat, on_delete=models.CASCADE)
+#     chat_to_respond = models.ForeignKey(Chat, on_delete=models.CASCADE)
+#     datetime = models.DateTimeField(default=datetime.datetime.now)
+#
+#     time_period_in_days = models.IntegerField(verbose_name="period", default=1)
+#     interval_in_hours = models.IntegerField(verbose_name="interval", default=1)
+#     frequency = models.DurationField(verbose_name="Frequency")
+#     timestamp = models.TimeField(verbose_name="Time")
