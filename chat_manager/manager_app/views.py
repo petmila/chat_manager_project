@@ -2,7 +2,9 @@ import datetime
 
 from django.http import JsonResponse
 from django.views.generic import TemplateView
+from django.views import View
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -12,6 +14,8 @@ import llm_models.saiga_llm_chain
 from llm_models.text_preprocess import preprocess
 from manager_app import models, serializers
 from rest_framework import generics, status
+
+from manager_app.models import EmployeeAccount
 
 
 class EmployeeListView(generics.ListCreateAPIView):
@@ -45,16 +49,16 @@ class MessageDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Message.objects.all()
     serializer_class = serializers.MessageSerializer
 
-
 class ModelResponseListView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = models.ModelResponse.objects.all()
     serializer_class = serializers.ModelResponseSerializer
 
     def create(self, request, *args, **kwargs):
-        datetime_ = request.data['time_period']
+        first_date = request.data['first_date']
+        last_date = request.data['last_date']
         chat = models.Chat.objects.filter(source_chat_id=request.data['source_chat_id']).first()
-        messages = models.Message.objects.filter(chat=chat, timestamp__day=datetime_).order_by('timestamp')
+        messages = models.Message.objects.filter(chat=chat, timestamp__range=(first_date, last_date)).order_by('timestamp')
         queryset = [
             str(message)
             if message.reply_source_message_id is None
@@ -100,6 +104,22 @@ class GenerationSettingsListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = models.GenerationSettings.objects.all()
     serializer_class = serializers.GenerationSettingsSerializer
+
+class ChatListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.ChatSerializer
+    queryset = models.Chat.objects.all()
+
+
+class ChatsByEmployeeNicknameView(View):
+    def get(self, request, nickname):
+        employee = get_object_or_404(EmployeeAccount, nickname=nickname)
+        messages = models.Message.objects.filter(employee_account=employee).order_by('timestamp')
+        chat_data = {}
+        for message in messages:
+            chat_data[message.chat.name] = message.chat.source_chat_id
+
+        return JsonResponse(chat_data, safe=False)
 
 
 class LlamaTestView(TemplateView):

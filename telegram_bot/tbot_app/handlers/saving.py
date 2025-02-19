@@ -1,11 +1,12 @@
-from aiogram import Router, types
-from aiogram.filters import Command, CommandObject
-from magic_filter import F
+from aiogram import Router, types, F
 
 from tbot_app.app import session
-from tbot_app.data import post_message
+from tbot_app.filters.chat_type import ChatTypeFilter
 
 router = Router()
+router.message.filter(
+    ChatTypeFilter(chat_type=["group", "supergroup"])
+)
 
 @router.message(F.content_type.in_({'text'}))
 async def message_save(message: types.Message):
@@ -21,7 +22,7 @@ async def message_save(message: types.Message):
                             'chat_source': 'Telegram',
                             'name': message.chat.title,
                         }}
-    await post_message(session, data)
+    await session.post_message(data)
 
 
 # @router.message(F.content_type.in_({'file'}))

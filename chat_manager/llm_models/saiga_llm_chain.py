@@ -6,7 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.llms import LlamaCpp
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+# from langchain_core.prompts import ChatPromptTemplate
 
 
 class SaigaModel:
