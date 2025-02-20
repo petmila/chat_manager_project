@@ -16,6 +16,10 @@ router = Router()
 router.message.filter(
     ChatTypeFilter(chat_type=["group", "supergroup"])
 )
+router.callback_query.filter(
+    ChatTypeFilter(chat_type=["group", "supergroup"])
+)
+
 
 @router.message(Command("summary"))
 async def summary_handler(message: types.Message):
@@ -78,9 +82,11 @@ async def summary_for_week_handler(callback: types.CallbackQuery):
 
 @router.callback_query(F.data == "calendar_summary")
 async def calendar_handler(callback: types.CallbackQuery):
+
     await callback.message.answer(
         "Pick a date: ",
-        reply_markup=await SimpleCalendar(locale=await get_user_locale(callback.from_user)).start_calendar()
+        reply_markup=await SimpleCalendar(
+            locale=await get_user_locale(callback.from_user)).start_calendar()
     )
     await callback.answer()
 
@@ -97,4 +103,4 @@ async def process_calendar(callback: CallbackQuery, callback_data: CallbackData)
         if html_validation(summary):
             await callback.message.answer(summary, parse_mode=ParseMode.HTML)
         else:
-            await callback.message.answer(summary)
+            await callback.message.answer(f"Вот твое резюме:\n{summary}")

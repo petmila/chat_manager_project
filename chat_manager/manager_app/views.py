@@ -59,12 +59,13 @@ class ModelResponseListView(generics.ListCreateAPIView):
         last_date = request.data['last_date']
         chat = models.Chat.objects.filter(source_chat_id=request.data['source_chat_id']).first()
 
-        messages = models.Message.objects.filter(chat=chat, timestamp__range=(first_date, last_date)).order_by('timestamp')
+        messages = models.Message.objects.filter(chat=chat,
+                                                 timestamp__range=(first_date, last_date)).order_by('timestamp')
         queryset = [
             str(message)
-            if message.reply_source_message_id is None
-            else str(message) + str(
-                models.Message.objects.filter(source_message_id=message.reply_source_message_id).first())
+            # if message.reply_source_message_id is None
+            # else str(message) + str(
+            #     models.Message.objects.filter(source_message_id=message.reply_source_message_id).first())
             for message in messages
         ]
 
@@ -74,6 +75,7 @@ class ModelResponseListView(generics.ListCreateAPIView):
         # result = model.interact('-'.join(queryset))
         #
         #
+        print('-'.join(queryset))
         data = {
             'text': '-'.join(queryset),
             'date': datetime.date.today(), 'chat': chat.id}

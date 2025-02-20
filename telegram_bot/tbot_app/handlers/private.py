@@ -18,6 +18,9 @@ router = Router()
 router.message.filter(
     ChatTypeFilter(chat_type=["private"])
 )
+router.callback_query.filter(
+    ChatTypeFilter(chat_type=["private"])
+)
 
 @router.message(Command("summary"))
 async def summary_handler(message: types.Message, state: FSMContext):
@@ -55,7 +58,7 @@ async def process_calendar(callback: CallbackQuery, callback_data: CallbackData,
         if html_validation(summary):
             await callback.message.answer(summary, parse_mode=ParseMode.HTML)
         else:
-            await callback.message.answer(summary)
+            await callback.message.answer(f"Вот твое резюме:\n{summary}")
 
 @router.message(Command("chats"))
 async def chats_handler(message: types.Message):
@@ -63,6 +66,6 @@ async def chats_handler(message: types.Message):
         reply_markup=make_inline_keyboard({
             'today_summary': 'Today',
             'yesterday_summary': 'Yesterday',
-            'this_week_summary': 'This\n week',
+            'this_week_summary': 'This week',
             'calendar_summary': 'Pick a date',
         }))
