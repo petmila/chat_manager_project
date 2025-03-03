@@ -45,3 +45,13 @@ class HTTPSession:
                                 headers={"Content-Type": "application/json"}) as response:
             return await response.json()
 
+    async def post_task_schedule(self, data):
+        if self._session is None:
+            self.start()
+        async with self._session.post(url=config('TASK_SCHEDULE_URL'),
+                                auth=aiohttp.BasicAuth(config('TELEGRAM_ADMIN_USER'),
+                                                       config('TELEGRAM_ADMIN_PASSWORD')),
+                                data=json.dumps(data, default=str),
+                                headers={"Content-Type": "application/json"}) as response:
+            return await response.json()
+

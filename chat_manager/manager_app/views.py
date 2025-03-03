@@ -124,6 +124,23 @@ class ChatsByEmployeeNicknameView(View):
 
         return JsonResponse(chat_data, safe=False)
 
+class TaskScheduleView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = models.TaskSchedule.objects.all()
+    serializer_class = serializers.TaskScheduleSerializer
+
+    def create(self, request, *args, **kwargs):
+        request.data['content_chat'] = models.Chat.objects.get(source_chat_id=request.data['content_chat']).id
+        serializer = serializers.TaskScheduleSerializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        except ValidationError:
+            return Response({"errors": (serializer.errors,)},
+                            status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(request.data, status=status.HTTP_200_OK)
+
 
 class LlamaTestView(TemplateView):
     def post(self, request, **kwargs):

@@ -31,8 +31,6 @@ class ModelResponseStrategy(models.Model):
                                        """)
     n_context = models.IntegerField(verbose_name="n_context", default=4096)
 
-
-
 class Chat(models.Model):
     source_chat_id = models.CharField(verbose_name="Source Chat ID", max_length=200, null=True, unique=True)
     chat_source = models.CharField(choices=ChatSource, max_length=20, default=ChatSource.telegram)
@@ -59,12 +57,11 @@ class ModelResponse(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     response_strategy = models.ForeignKey(ModelResponseStrategy, on_delete=models.CASCADE, null=True)
 
-# class TaskSchedule(models.Model):
-#     chat_for_summary = models.ForeignKey(Chat, on_delete=models.CASCADE)
-#     chat_to_respond = models.ForeignKey(Chat, on_delete=models.CASCADE)
-#     datetime = models.DateTimeField(default=datetime.datetime.now)
-#
-#     time_period_in_days = models.IntegerField(verbose_name="period", default=1)
-#     interval_in_hours = models.IntegerField(verbose_name="interval", default=1)
-#     frequency = models.DurationField(verbose_name="Frequency")
-#     timestamp = models.TimeField(verbose_name="Time")
+class TaskSchedule(models.Model):
+    content_chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+    source_chat_id = models.IntegerField(verbose_name="Source Message ID", null=True)
+    next_run_time = models.DateTimeField(default=datetime.date.today)
+
+    time_period_in_hours = models.DurationField(verbose_name="time period in hours", default=datetime.timedelta)
+    interval_hours = models.DurationField(verbose_name="interval in hours", default=datetime.timedelta)
+    timestamp = models.TimeField(verbose_name="Time")

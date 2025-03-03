@@ -1,13 +1,15 @@
 
 from django.urls import path
 
-from manager_app.views import (ModelResponseListView, ModelResponseDetailView,
+from manager_app.models import TaskSchedule
+from manager_app.views import (ModelResponseListView, ModelResponseDetailView, TaskScheduleView,
     # NoteListView, NoteDetailView, \
                                MessageListView, LlamaTestView, ChatListView, ChatsByEmployeeNicknameView)
 
 urlpatterns = [
     path("summary/", ModelResponseListView.as_view(), name="summary-list"),
     path("chats/", ChatListView.as_view(), name="chat-list"),
+    path("tasks_schedule/", TaskScheduleView.as_view(), name="task-schedule-list"),
     path('chats/by-nickname/<str:nickname>/', ChatsByEmployeeNicknameView.as_view(), name='chats_by_nickname'),
     path("test-view/", LlamaTestView.as_view(), name="test-view"),
     path("summary-detail/", ModelResponseDetailView.as_view(), name="summary-detail"),

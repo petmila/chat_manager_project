@@ -68,3 +68,10 @@ class GenerationSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.GenerationSettings
         fields = ['id', '']
+
+class TaskScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.TaskSchedule
+        fields = ['id', 'content_chat', 'source_chat_id',
+                  'next_run_time', 'time_period_in_hours',
+                  'interval_hours', 'timestamp']
