@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: "rabbitmq:management"
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"   # Для Celery
+      - "15672:15672" # Web-интерфейс RabbitMQ
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  django:
+    build: .
+    container_name: django
+    restart: always
+    depends_on:
+      - rabbitmq
+    environment:
+      - CELERY_BROKER_URL=pyamqp://guest@rabbitmq//
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  celery:
+    build: .
+    container_name: celery
+    restart: always
+    depends_on:
+      - rabbitmq
+      - django
+    environment:
+      - CELERY_BROKER_URL=pyamqp://guest@rabbitmq//
+    command: celery -A your_project worker --loglevel=info
+
+  celery-beat:
+    build: .
+    container_name: celery-beat
+    restart: always
+    depends_on:
+      - rabbitmq
+      - django
+      - celery
+    environment:
+      - CELERY_BROKER_URL=pyamqp://guest@rabbitmq//
+    command: celery -A your_project beat --loglevel=info

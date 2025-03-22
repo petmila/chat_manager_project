@@ -14,7 +14,7 @@ import llm_models.saiga_llm_chain
 from llm_models.text_preprocess import preprocess
 from manager_app import models, serializers
 from rest_framework import generics, status
-
+import django_celery_beat.models as celery_beat
 from manager_app.models import EmployeeAccount
 
 
@@ -124,14 +124,22 @@ class ChatsByEmployeeNicknameView(View):
 
         return JsonResponse(chat_data, safe=False)
 
-class TaskScheduleView(generics.ListCreateAPIView):
+class PeriodicTaskView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = models.TaskSchedule.objects.all()
-    serializer_class = serializers.TaskScheduleSerializer
+    queryset = celery_beat.PeriodicTask.objects.all()
+    serializer_class = serializers.PeriodicTaskSerializer
 
     def create(self, request, *args, **kwargs):
-        request.data['content_chat'] = models.Chat.objects.get(source_chat_id=request.data['content_chat']).id
-        serializer = serializers.TaskScheduleSerializer(data=request.data)
+        request.data['kwargs']['content_chat'] = models.Chat.objects.get(source_chat_id=request.data['kwargs']['content_chat']).id
+        # request.data['crontab'] = celery_beat.CrontabSchedule(
+        #     minute=request.data['crontab']['minute'],
+        #     hour=request.data['crontab']['hour'],
+        #     day_of_week=request.data['crontab']['day_of_week'],
+        #     day_of_month=request.data['crontab']['day_of_month'],
+        #     month_of_year=request.data['crontab']['month_of_year'],
+        # )
+        request.data['kwargs'] = str(request.data['kwargs'])
+        serializer = serializers.PeriodicTaskSerializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
             serializer.save()

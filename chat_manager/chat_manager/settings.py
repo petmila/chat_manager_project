@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'rest_framework',
+    'django_celery_beat',
     'manager_app'
 ]
 
@@ -78,6 +79,11 @@ DATABASES = {
         "PORT": config("PORT")
     }
 }
+
+# Celery
+CELERY_BROKER_URL = 'pyamqp://guest@rabbitmq//'  # Используем имя контейнера
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

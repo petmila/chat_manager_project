@@ -1,5 +1,7 @@
 import datetime
 from django.db import models
+import django_celery_beat.models as celery_beat
+
 
 class ChatSource(models.TextChoices):
     telegram = 'Telegram', 'telegram'
@@ -57,11 +59,17 @@ class ModelResponse(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     response_strategy = models.ForeignKey(ModelResponseStrategy, on_delete=models.CASCADE, null=True)
 
-class TaskSchedule(models.Model):
-    content_chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    source_chat_id = models.IntegerField(verbose_name="Source Message ID", null=True)
-    next_run_time = models.DateTimeField(default=datetime.date.today)
+# class TaskSchedule(models.Model):
+#     content_chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+#     source_chat_id = models.IntegerField(verbose_name="Source Message ID", null=True)
+#     next_run_time = models.DateTimeField(default=datetime.date.today)
+#
+#     time_period_in_hours = models.DurationField(verbose_name="time period in hours", default=datetime.timedelta)
+#     interval_hours = models.DurationField(verbose_name="interval in hours", default=datetime.timedelta)
+#     timestamp = models.TimeField(verbose_name="Time")
 
-    time_period_in_hours = models.DurationField(verbose_name="time period in hours", default=datetime.timedelta)
-    interval_hours = models.DurationField(verbose_name="interval in hours", default=datetime.timedelta)
-    timestamp = models.TimeField(verbose_name="Time")
+# class TaskSchedule(models.Model):
+#     source_chat_id = models.IntegerField(verbose_name="Source Message ID", null=True)
+#     content_chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+#     task = models.ForeignKey(celery_beat.PeriodicTask, on_delete=models.CASCADE)
+

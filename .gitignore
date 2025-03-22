@@ -13,3 +13,5 @@ telegram_bot/.env
 /chat_manager/manager_app/migrations
 /chat_manager/manager_app/migrations
 /chat_manager/manager_app/migrations
+chat_manager/__pycache__/manage.cpython-311.pyc
+/chat_manager/tests/__pycache__

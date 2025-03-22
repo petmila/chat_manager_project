@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from manager_app import models
+import django_celery_beat.models as celery_beat
 
 
 class ChatSerializer(serializers.ModelSerializer):
@@ -20,6 +21,7 @@ class SlugRelatedGetOrCreateField(serializers.SlugRelatedField):
     def to_representation(self, obj):
         """Возвращает только значение slug_field, а не весь объект"""
         return getattr(obj, self.slug_field)
+
 
 class EmployeeAccountSerializer(serializers.ModelSerializer):
     class Meta:
@@ -69,9 +71,12 @@ class GenerationSettingsSerializer(serializers.ModelSerializer):
         model = models.GenerationSettings
         fields = ['id', '']
 
-class TaskScheduleSerializer(serializers.ModelSerializer):
+class PeriodicTaskSerializer(serializers.ModelSerializer):
+    crontab = SlugRelatedGetOrCreateField(
+        many=False,
+        queryset=celery_beat.CrontabSchedule.objects.all(),
+        slug_field='id'
+    )
     class Meta:
-        model = models.TaskSchedule
-        fields = ['id', 'content_chat', 'source_chat_id',
-                  'next_run_time', 'time_period_in_hours',
-                  'interval_hours', 'timestamp']
+        model = celery_beat.PeriodicTask
+        fields = ['id', 'name', 'crontab', 'task', 'kwargs']

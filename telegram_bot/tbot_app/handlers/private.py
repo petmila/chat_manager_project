@@ -99,10 +99,26 @@ async def chats_handler_for_settings(callback: types.CallbackQuery, state: FSMCo
     hours, minutes = data['timestamp'].split(":")
     freq = timedelta(hours=int(data['frequency']))
     next_run = datetime.today().replace(hour=int(hours), minute=int(minutes), second=0) + freq
-    task_schedule_data = {'content_chat': data['chat_id'], 'source_chat_id': callback.message.chat.id,
-                  'next_run_time': next_run,
-                          'time_period_in_hours': freq,
-                  'interval_hours': freq, 'timestamp': data['timestamp']}
+
+    task_schedule_data = {
+        'kwargs': {
+            'content_chat': data['chat_id'],
+            'source_chat_id': callback.message.chat.id,
+        },
+        'crontab': {
+            'minute': minutes,
+            'hour': hours,
+            'day_of_week': '*',
+            'day_of_month': '*',
+            'month_of_year': '*',
+        },
+        'task': 'manager_app.celery.check_scheduled_tasks',
+        'name': f"Resume for {callback.message.chat.id} about {data['chat_id']}",
+    }
+    # task_schedule_data = {'content_chat': data['chat_id'], 'source_chat_id': callback.message.chat.id,
+    #               'next_run_time': next_run,
+    #                       'time_period_in_hours': freq,
+    #               'interval_hours': freq, 'timestamp': data['timestamp']}
     response = await session.post_task_schedule(task_schedule_data)
     await callback.message.reply("Оки, все будет")
     await state.clear()
