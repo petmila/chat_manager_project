@@ -2,7 +2,7 @@ version: '3.11'
 
 services:
   db:
-    image: postgres:latest
+    image: pgvector/pgvector:pg16
     container_name: db_container
     restart: always
     environment:
@@ -10,9 +10,14 @@ services:
       POSTGRES_PASSWORD: ${SQL_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - ${PORT}:${PORT}
+      - ${PORT}:5432
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $SQL_USER -p $PORT -d $POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - chat_network
     env_file:
@@ -23,9 +28,10 @@ services:
     container_name: django_app
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
-      - "8080:8080"
+      - "8000:8000"
     environment:
       DJANGO_SECRET_KEY: ${SECRET_KEY}
       DATABASE_NAME: ${SQL_NAME}
@@ -41,7 +47,7 @@ services:
 
 networks:
   chat_network:
-    external: true
+    driver: bridge
 
 volumes:
   db_data:

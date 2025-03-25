@@ -49,6 +49,7 @@ class MessageDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Message.objects.all()
     serializer_class = serializers.MessageSerializer
 
+
 class ModelResponseListView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = models.ModelResponse.objects.all()
@@ -71,23 +72,21 @@ class ModelResponseListView(generics.ListCreateAPIView):
 
         print('-'.join(queryset))
 
-        # model = llm_models.saiga_llm_chain.SaigaModel()
-        # result = model.interact('-'.join(queryset))
-        #
-        #
-        print('-'.join(queryset))
+        model = llm_models.saiga_llm_chain.SaigaModel()
+        result = model.interact('-'.join(queryset))
+
         data = {
-            'text': '-'.join(queryset),
+            'text': result,
             'date': datetime.date.today(), 'chat': chat.id}
-        # serializer = serializers.ModelResponseSerializer(data=data)
-        # try:
-        #     serializer.is_valid(raise_exception=True)
-        #     serializer.save()
-        # except ValidationError:
-        #     return Response({"errors": (serializer.errors,)},
-        #                     status=status.HTTP_400_BAD_REQUEST)
-        # else:
-        return Response(data, status=status.HTTP_200_OK)
+        serializer = serializers.ModelResponseSerializer(data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        except ValidationError:
+            return Response({"errors": (serializer.errors,)},
+                            status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(data, status=status.HTTP_200_OK)
 
 
 class ModelResponseDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -107,6 +106,7 @@ class GenerationSettingsListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = models.GenerationSettings.objects.all()
     serializer_class = serializers.GenerationSettingsSerializer
+
 
 class ChatListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)

@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       TELEGRAM_TOKEN: ${TOKEN}
-      API_URL: "http://localhost:8000"
+      API_URL: "http://django_app:8000"
     networks:
       - chat_network
     env_file:
