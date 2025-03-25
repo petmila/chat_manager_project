@@ -2,7 +2,6 @@
 from django.urls import path
 
 from manager_app.views import (ModelResponseListView, ModelResponseDetailView,
-    # NoteListView, NoteDetailView, \
                                MessageListView, LlamaTestView, ChatListView, ChatsByEmployeeNicknameView)
 
 urlpatterns = [

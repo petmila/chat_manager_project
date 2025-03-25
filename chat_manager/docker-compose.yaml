@@ -1,0 +1,47 @@
+version: '3.11'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: db_container
+    restart: always
+    environment:
+      POSTGRES_USER: ${SQL_USER}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - chat_network
+    env_file:
+      - .env
+
+  app:
+    build: .
+    container_name: django_app
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      DJANGO_SECRET_KEY: ${SECRET_KEY}
+      DATABASE_NAME: ${SQL_NAME}
+      DATABASE_USERNAME: ${SQL_USER}
+      DATABASE_PASSWORD: ${SQL_PASSWORD}
+      DATABASE_HOST: ${HOST}
+      DATABASE_PORT: ${PORT}
+    command: ["/bin/sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+    networks:
+      - chat_network
+    env_file:
+      - .env
+
+networks:
+  chat_network:
+    external: true
+
+volumes:
+  db_data:

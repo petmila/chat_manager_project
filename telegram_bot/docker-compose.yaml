@@ -1,0 +1,19 @@
+version: '3.11'
+
+services:
+  telegram_bot:
+    build: .
+    container_name: telegram_bot_container
+    restart: always
+    environment:
+      TELEGRAM_TOKEN: ${TOKEN}
+      API_URL: "http://localhost:8000"
+    networks:
+      - chat_network
+    env_file:
+      - .env
+
+
+networks:
+  chat_network:
+    external: true
