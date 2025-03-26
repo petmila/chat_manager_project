@@ -39,7 +39,6 @@ services:
       DATABASE_PASSWORD: ${SQL_PASSWORD}
       DATABASE_HOST: ${HOST}
       DATABASE_PORT: ${PORT}
-    command: ["/bin/sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
     networks:
       - chat_network
     env_file:

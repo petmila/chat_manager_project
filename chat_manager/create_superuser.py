@@ -3,22 +3,25 @@ import django
 from django.contrib.auth import get_user_model
 from dotenv import load_dotenv
 
+import sys
+print("=== Запуск create_superuser.py ===")
+sys.stdout.flush()  # Принудительный вывод
+
 load_dotenv()
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "your_project.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chat_manager.settings")
 django.setup()
 
 User = get_user_model()
 
-USERNAME = os.getenv("DJANGO_SUPERUSER_USERNAME")
-EMAIL = os.getenv("DJANGO_SUPERUSER_EMAIL")
-PASSWORD = os.getenv("DJANGO_SUPERUSER_PASSWORD")
+USERNAME = os.getenv("TELEGRAM_ADMIN_USER")
+EMAIL = os.getenv("TELEGRAM_ADMIN_EMAIL")
+PASSWORD = os.getenv("TELEGRAM_ADMIN_PASSWORD")
 
-if hasattr(User.objects, "create_superuser"):
-    if not User.objects.filter(username=USERNAME).exists():
-        print(f"Создаём суперпользователя: {USERNAME}")
-        User.objects.create_superuser(username=USERNAME, email=EMAIL, password=PASSWORD)
-    else:
-        print("Суперпользователь уже существует.")
+
+if not User.objects.filter(username=USERNAME).exists():
+    print(f"Создаём суперпользователя: {USERNAME}")
+    User.objects.create_superuser(username=USERNAME, email=EMAIL, password=PASSWORD)
 else:
-    print("Ошибка: у User.objects нет метода create_superuser. Проверьте модель пользователя.")
+    print("Суперпользователь уже существует.")
+
