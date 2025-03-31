@@ -1,0 +1,60 @@
+version: '3.11'
+
+services:
+  django_app:
+    build: ./chat_manager
+    container_name: django-app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DJANGO_SETTINGS_MODULE=chat_manager.settings
+    ports:
+      - "8000:8000"
+    networks:
+      - chat_network
+    env_file:
+      - ./chat_manager/.env
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: db-container
+    restart: always
+    environment:
+     POSTGRES_DB: ${DATABASE_NAME}
+     POSTGRES_USER: ${DATABASE_USERNAME}
+     POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $DATABASE_USERNAME -p $DATABASE_PORT -e $DATABASE_PASSWORD -d $DATABASE_NAME"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - chat_network
+    env_file:
+      - ./chat_manager/.env
+
+  telegram_bot:
+    build: ./telegram_bot
+    container_name: telegram-bot
+    restart: always
+    depends_on:
+      django_app:
+        condition: service_started
+    environment:
+      DJANGO_API_URL: http://django-app
+    networks:
+      - chat_network
+    env_file:
+      - ./telegram_bot/.env
+
+networks:
+  chat_network:
+    driver: bridge
+
+volumes:
+  db_data:

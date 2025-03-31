@@ -16,13 +16,13 @@ from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get("SECRET_KEY"),
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY"),
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+# ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(',')
+ALLOWED_HOSTS = ['localhost', '127.0.0.1',  "django-app"]
 
 # Application definition
 
@@ -71,11 +71,11 @@ WSGI_APPLICATION = 'chat_manager.wsgi.application'
 DATABASES = {
     'default': {
         "ENGINE": "django.db.backends.postgresql",
-        "HOST": config("HOST"),
-        "NAME": config("POSTGRES_DB"),
-        "USER": config("SQL_USER"),
-        "PASSWORD": config("SQL_PASSWORD"),
-        "PORT": config("PORT")
+        "HOST": config("DATABASE_HOST"),
+        "NAME": config("DATABASE_NAME"),
+        "USER": config("DATABASE_USERNAME"),
+        "PASSWORD": config("DATABASE_PASSWORD"),
+        "PORT": config("DATABASE_PORT")
     }
 }
 
