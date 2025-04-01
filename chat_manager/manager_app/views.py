@@ -33,6 +33,18 @@ class MessageListView(generics.ListCreateAPIView):
     serializer_class = serializers.MessageSerializer
 
     def create(self, request, *args, **kwargs):
+        is_employee_in_this_chat: bool = False
+        account = models.EmployeeAccount.objects.filter(nickname=request.data['forward_from']).first()
+        # message is forwarded
+        if account is not None:
+            messages = models.Message.objects.filter(employee_account=account).order_by('timestamp')
+            for message in messages:
+                if str(message.chat.source_chat_id) == str(request.data['chat']['source_chat_id']):
+                    is_employee_in_this_chat = True
+            if is_employee_in_this_chat:
+                request.data['employee_account']['nickname'] = request.data['forward_from']
+            else:
+                request.data['text'] = 'согласно словам ' + request.data['forward_from'] + ' ' + request.data['text']
         request.data['text'] = preprocess(request.data['text'])
         serializer = serializers.MessageSerializer(data=request.data)
         try:
