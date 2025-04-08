@@ -1,11 +1,9 @@
-from celery import shared_task
 from manager_app import models, serializers
 from llm_models.text_preprocess import preprocess
 from rest_framework.exceptions import ValidationError
 import pika
 import json
-from manager_app.models import Message
-from chat_manager.celery import celery_app
+from celery import celery_app
 
 RABBITMQ_HOST = "rabbitmq"
 

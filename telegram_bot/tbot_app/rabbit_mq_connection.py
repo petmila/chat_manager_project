@@ -22,7 +22,7 @@ class RabbitMQConnection:
         self.channel.basic_publish(
             exchange="",
             routing_key=queue_name,
-            body=json.dumps(message),
+            body=json.dumps(message, default=str),
             properties=pika.BasicProperties(delivery_mode=2)
         )
 

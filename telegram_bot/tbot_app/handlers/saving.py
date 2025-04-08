@@ -26,7 +26,7 @@ async def message_save(message: types.Message):
                 'name': message.chat.title,
             }}
     # await session.post_message(data)
-    await connection.send_message(data, queue="updates_queue")
+    connection.send_message(message=data, queue_name="updates_queue")
 
 # @router.message(F.content_type.in_({'file'}))
 # async def history_save(message: types.Message):
