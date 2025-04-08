@@ -12,7 +12,7 @@ class RabbitMQConnection:
 
     def connect(self):
         """Создаёт соединение"""
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host))
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host, heartbeat=600))
         self.channel = self.connection.channel()
         self.channel.confirm_delivery()
 
