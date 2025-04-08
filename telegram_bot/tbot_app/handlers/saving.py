@@ -1,6 +1,6 @@
 from aiogram import Router, types, F
 
-from tbot_app.app import session
+from tbot_app.app import connection
 from tbot_app.filters.chat_type import ChatTypeFilter
 
 router = Router()
@@ -25,7 +25,8 @@ async def message_save(message: types.Message):
                 'chat_source': 'Telegram',
                 'name': message.chat.title,
             }}
-    await session.post_message(data)
+    # await session.post_message(data)
+    await connection.send_message(data, queue="updates_queue")
 
 # @router.message(F.content_type.in_({'file'}))
 # async def history_save(message: types.Message):

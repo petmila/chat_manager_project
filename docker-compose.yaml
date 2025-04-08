@@ -1,6 +1,16 @@
 version: '3.11'
 
 services:
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
   django_app:
     build: ./chat_manager
     container_name: django-app
@@ -8,8 +18,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     environment:
       - DJANGO_SETTINGS_MODULE=chat_manager.settings
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
     ports:
       - "8000:8000"
     networks:
@@ -33,6 +46,15 @@ services:
       - chat_network
     env_file:
       - ./chat_manager/.env
+  
+  celery_worker:
+    build: .
+    command: celery -A myproject worker --loglevel=info
+    depends_on:
+      - rabbitmq
+      - django
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
 
   telegram_bot:
     build: ./telegram_bot
