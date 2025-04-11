@@ -34,8 +34,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django_celery_beat',
     'rest_framework',
-    'manager_app'
+    'manager_app',
 ]
 
 MIDDLEWARE = [
@@ -122,9 +123,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CELERY
-CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq:5672/"
+CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq:5673/"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
-CELERY_TASK_QUEUES = [
-    Queue("updates_queue"),
-]
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_IMPORTS = (
+'manager_app.tasks',
+)
