@@ -14,7 +14,7 @@ services:
       - chat_network
 
   django_app:
-    build: ./chat_manager
+    image: image_django_app
     container_name: django-app
     restart: always
     depends_on:
@@ -31,6 +31,9 @@ services:
       - chat_network
     env_file:
       - ./chat_manager/.env
+    volumes:
+      - llm_model:/app/data
+
   db:
     image: pgvector/pgvector:pg16
     container_name: db-container
@@ -48,9 +51,10 @@ services:
       - chat_network
     env_file:
       - ./chat_manager/.env
+    
   
   rabbitmq_consumer:
-    build: ./chat_manager
+    image: image_django_app
     command: python manage.py rabbitmq_consumer
     depends_on:
       rabbitmq:
@@ -59,6 +63,8 @@ services:
         condition: service_started
     networks:
       - chat_network
+    volumes:
+      - llm_model:/app/data
 
   telegram_bot:
     build: ./telegram_bot
@@ -67,12 +73,45 @@ services:
     depends_on:
       django_app:
         condition: service_started
+      rabbitmq:
+        condition: service_started
     environment:
       DJANGO_API_URL: http://django-app
     networks:
       - chat_network
     env_file:
       - ./telegram_bot/.env
+  
+  celery:
+    image: image_django_app
+    command: celery -A chat_manager worker -Q celery -l debug
+    depends_on:
+      rabbitmq:
+        condition: service_started
+    networks:
+      - chat_network
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - DJANGO_SETTINGS_MODULE=chat_manager.settings
+    volumes:
+      - llm_model:/app/data
+  
+  celery-beat:
+    image: image_django_app
+    command: celery -A chat_manager beat -l debug --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    networks:
+      - chat_network
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      django_app:
+        condition: service_started
+      celery:
+        condition: service_started
+    environment:
+      - DJANGO_SETTINGS_MODULE=chat_manager.settings
+    volumes:
+      - llm_model:/app/data
 
 networks:
   chat_network:
@@ -80,3 +119,4 @@ networks:
 
 volumes:
   db_data:
+  llm_model:
