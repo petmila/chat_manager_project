@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from manager_app import models
+import django_celery_beat.models as celery_beat
 
 
 class ChatSerializer(serializers.ModelSerializer):
@@ -68,3 +69,14 @@ class GenerationSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.GenerationSettings
         fields = ['id', '']
+
+
+class PeriodicTaskSerializer(serializers.ModelSerializer):
+    crontab = SlugRelatedGetOrCreateField(
+        many=False,
+        queryset=celery_beat.CrontabSchedule.objects.all(),
+        slug_field='id'
+    )
+    class Meta:
+        model = celery_beat.PeriodicTask
+        fields = ['id', 'name', 'crontab', 'task', 'kwargs']

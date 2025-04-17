@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from aiogram import types, Router, F
 from aiogram.enums import ParseMode
@@ -36,9 +36,10 @@ async def summary_handler(message: types.Message, state: FSMContext):
 @router.callback_query(F.data.startswith('chat__'))
 async def chats_handler(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(chat_id=callback.data.split("__")[1])
+    print(await get_user_locale(callback.from_user))
     await callback.message.reply(
         "Pick a date: ",
-        reply_markup=await SimpleCalendar(locale=await get_user_locale(callback.from_user)).start_calendar()
+        reply_markup=await SimpleCalendar(locale=await get_user_locale(callback.from_user) + '.UTF-8').start_calendar()
     )
     await state.set_state(PrivateSummary.date)
     await callback.answer()
@@ -48,13 +49,13 @@ async def process_calendar(callback: CallbackQuery, callback_data: CallbackData,
     data = await state.get_data()
     await state.clear()
     calendar = SimpleCalendar(
-        locale=await get_user_locale(callback.from_user), show_alerts=True
+        locale=await get_user_locale(callback.from_user) + '.UTF-8', show_alerts=True
     )
     calendar.set_dates_range(datetime(2022, 1, 1), datetime(2025, 12, 31))
     selected, date_ = await calendar.process_selection(callback, callback_data)
     if selected:
         await callback.message.edit_text("Wait for your summary")
-        summary = await summary_request(session, data['chat_id'], date_, date_)
+        summary = await summary_request(session, data['chat_id'], first_date=date_ - timedelta(days=1), last_date=date_ + timedelta(days=1))
         if html_validation(summary):
             await callback.message.answer(summary, parse_mode=ParseMode.HTML)
         else:
