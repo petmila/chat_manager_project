@@ -98,7 +98,7 @@ services:
   
   celery-beat:
     image: image_django_app
-    command: celery -A chat_manager beat -l debug --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A chat_manager beat -l debug --scheduler chat_manager.scheduler.PatchedDatabaseScheduler
     networks:
       - chat_network
     depends_on:

@@ -34,16 +34,24 @@ def save(text):
     obj_.save()
 
 @celery_app.task
-def perform_summary_on_chat(content_chat: int, source_chat_id: int):
+def perform_summary_on_chat(*args, **kwargs):
     """
     source_chat_id: чат, в который нужно прислать результат
     content_chat:   чат из которого генерируется резюме
     """
+    pt_id = kwargs.get('periodic_task_id')
+    source_chat_id = kwargs.get('source_chat_id')
+    content_chat = kwargs.get('content_chat')
+
     from manager_app import models, serializers
-    first_date = request.data['first_date']
-    last_date = request.data['last_date']
+    from django_celery_beat.models import PeriodicTask
     
-    chat = models.Chat.objects.filter(chat_id=content_chat).first()
+    task = PeriodicTask.objects.get(id=pt_id)
+
+    first_date = datetime.datetime.today() - datetime.timedelta(days=1)
+    last_date = datetime.datetime.today() + datetime.timedelta(days=1)
+
+    chat = models.Chat.objects.filter(id=int(content_chat)).first()
     messages = models.Message.objects.filter(chat=chat,
                                             timestamp__range=(first_date, last_date)).order_by('timestamp')
     queryset = [
