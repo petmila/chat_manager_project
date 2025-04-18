@@ -16,7 +16,7 @@ celery_app.config_from_object("django.conf:settings", namespace="CELERY")
 celery_app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 # @celery_app.on_after_configure.connect
-# def setup_periodic_tasks(sender: Celery, **kwargs):
+# def snetup_periodic_tasks(seder: Celery, **kwargs):
 #     # # Calls test('hello') every 10 seconds.
 #     # sender.add_periodic_task(10.0, test.s('hello'), name='add every 10')
 
@@ -27,38 +27,39 @@ celery_app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 #     # sender.add_periodic_task(60.0, save.s('nice ass'), expires=10)
 
-# @celery_app.task
-# def save(text):
-#     from manager_app import models
-#     obj_ = models.ModelResponseStrategy(strategy_name=text)
-#     obj_.save()
+@celery_app.task
+def save(text):
+    from manager_app import models
+    obj_ = models.ModelResponseStrategy(strategy_name=text)
+    obj_.save()
 
-# @celery_app.task
-# def perform_summary_on_chat(content_chat: int, source_chat_id: int):
-#     """
-#     source_chat_id: чат, в который нужно прислать результат
-#     content_chat:   чат из которого генерируется резюме
-#     """
-#     from manager_app import models, serializers
-#     # first_date = request.data['first_date']
-#     # last_date = request.data['last_date']
-#     chat = models.Chat.objects.filter(chat_id=content_chat).first()
-#     messages = models.Message.objects.filter(chat=chat,
-#                                             timestamp__range=(first_date, last_date)).order_by('timestamp')
-#     queryset = [
-#         str(message) for message in messages
-#     ]
+@celery_app.task
+def perform_summary_on_chat(content_chat: int, source_chat_id: int):
+    """
+    source_chat_id: чат, в который нужно прислать результат
+    content_chat:   чат из которого генерируется резюме
+    """
+    from manager_app import models, serializers
+    first_date = request.data['first_date']
+    last_date = request.data['last_date']
+    
+    chat = models.Chat.objects.filter(chat_id=content_chat).first()
+    messages = models.Message.objects.filter(chat=chat,
+                                            timestamp__range=(first_date, last_date)).order_by('timestamp')
+    queryset = [
+        str(message) for message in messages
+    ]
 
-#     model = llm_models.saiga_llm_chain.SaigaModel()
-#     result = model.interact('-'.join(queryset))
+    model = llm_models.saiga_llm_chain.SaigaModel()
+    result = model.interact('-'.join(queryset))
 
-#     data = {
-#         'text': result,
-#         'date': datetime.date.today(), 'chat': chat.id
-#     }
-#     serializer = serializers.ModelResponseSerializer(data=data)
-#     serializer.is_valid(raise_exception=True)
-#     serializer.save()
+    data = {
+        'text': result,
+        'date': datetime.date.today(), 'chat': chat.id
+    }
+    serializer = serializers.ModelResponseSerializer(data=data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
 
 celery_app.conf.update(
     imports=("chat_manager.celery",)

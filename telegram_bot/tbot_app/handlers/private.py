@@ -55,7 +55,7 @@ async def process_calendar(callback: CallbackQuery, callback_data: CallbackData,
     selected, date_ = await calendar.process_selection(callback, callback_data)
     if selected:
         await callback.message.edit_text("Wait for your summary")
-        summary = await summary_request(session, data['chat_id'], first_date=date_ - timedelta(days=1), last_date=date_ + timedelta(days=1))
+        summary = await summary_request(session, data['chat_id'], first_date=date_, last_date=date_ + timedelta(days=1))
         if html_validation(summary):
             await callback.message.answer(summary, parse_mode=ParseMode.HTML)
         else:
