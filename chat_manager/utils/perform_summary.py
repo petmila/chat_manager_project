@@ -3,11 +3,8 @@ import datetime
 from utils import saiga_llm_chain
 
 
-def perform_summary(chat_id, first_date, last_date):
-    from manager_app import models
-    chat = models.Chat.objects.filter(id=chat_id).first()
-    messages = models.Message.objects.filter(chat=chat,
-                                             timestamp__range=(first_date, last_date)).order_by('timestamp')
+def perform_summary(messages):
+    
     queryset = [
         str(message)
         # if message.reply_source_message_id is None

@@ -2,20 +2,21 @@ import asyncio
 import signal
 from tbot_app import bot, dp, connection, session
 from tbot_app.handlers import summary, saving, history, private
-from tbot_app.rabbit_mq_consumer import consumer_start
+from tbot_app.rabbit_mq_consumer import start_async_consumer
 
 async def shutdown():
     """Закрывает соединение при остановке бота"""
     connection.close()
 
+
 async def main():
+    asyncio.create_task(start_async_consumer())
     dp.include_routers(private.router, summary.router, history.router, saving.router)
     session.start()
-    consumer_start()
     try:
         await dp.start_polling(bot, close_bot_session=True)
     finally:
-        await connection.close()
+        
         await session.close()
 
 if __name__ == "__main__":

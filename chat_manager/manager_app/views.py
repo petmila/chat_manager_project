@@ -70,10 +70,11 @@ class ModelResponseListView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         chat = models.Chat.objects.filter(source_chat_id=request.data['source_chat_id']).first()
-        data = utils.perform_summary.perform_summary(
-            chat_id=chat.id,
-            first_date=request.data['first_date'],
-            last_date=request.data['last_date'])
+        first_date=request.data['first_date']
+        last_date=request.data['last_date']
+        messages = models.Message.objects.filter(chat=chat,
+                                             timestamp__range=(first_date, last_date)).order_by('timestamp')
+        data = utils.perform_summary.perform_summary(messages)
 
         serializer = serializers.ModelResponseSerializer(data=data)
         try:

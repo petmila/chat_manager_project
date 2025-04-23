@@ -1,7 +1,7 @@
 import asyncio
 import json
 
-import pika
+import aio_pika
 
 from tbot_app import bot
 
@@ -9,18 +9,23 @@ from tbot_app import bot
 async def send_message(chat_id, text):
     await bot.send_message(chat_id=chat_id, text=text)
 
-def callback(ch, method, properties, body):
-    data = json.loads(body)
-    chat_id = data["chat_id"]
-    text = data["text"]
+async def process_message(message: aio_pika.IncomingMessage):
+    async with message.process():
+        data = message.body.decode()
+        chat_id = data["chat_id"]
+        text = data["text"]
+        print(text)
+        asyncio.run(send_message(chat_id, text))
 
-    asyncio.run(send_message(chat_id, text))
-    ch.basic_ack(delivery_tag=method.delivery_tag)
+async def start_async_consumer():
+    connection = await aio_pika.connect_robust("amqp://guest:guest@rabbitmq/")
+    channel = await connection.channel()
+    queue = await channel.declare_queue("tg_bot_outbox", durable=True)
+    await queue.consume(process_message)
 
-def consumer_start():
-    connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
-    channel = connection.channel()
-    channel.queue_declare(queue="tg_bot_outbox", durable=True)
-    channel.basic_qos(prefetch_count=1)
-    channel.basic_consume(queue="tg_bot_outbox", on_message_callback=callback)
-    channel.start_consuming()
+    try:
+        await asyncio.Future()
+    except asyncio.CancelledError:
+        print("Consumer shutting down...")
+        await connection.close()
+        raise
