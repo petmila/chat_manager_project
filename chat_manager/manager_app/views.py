@@ -128,6 +128,7 @@ class PeriodicTaskView(generics.ListCreateAPIView):
     serializer_class = serializers.PeriodicTaskSerializer
 
     def create(self, request, *args, **kwargs):
+        
         request.data['kwargs']['content_chat'] = models.Chat.objects.get(source_chat_id=request.data['kwargs']['content_chat']).id
         request.data['kwargs'] = str(request.data['kwargs'])
         serializer = serializers.PeriodicTaskSerializer(data=request.data)

@@ -19,3 +19,7 @@ chat_manager/tests/__pycache__/models.cpython-311.pyc
 /telegram_bot/tbot_app/filters/__pycache__
 /telegram_bot/tbot_app/keyboards/__pycache__
 chat_manager/model-q4_K.gguf
+*.pgerd
+*.gguf
+erd.pgerd
+model-q4_K.gguf

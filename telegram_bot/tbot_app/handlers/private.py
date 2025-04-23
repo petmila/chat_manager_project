@@ -123,9 +123,9 @@ async def chats_handler_for_settings(callback: types.CallbackQuery, state: FSMCo
             'month_of_year': '*',
         },
         'task': 'celery.perform_summary_on_chat',
-        'name': f"Resume for {callback.message.chat.id} about {data['chat_id']}",
+        'name': f"Resume for {callback.message.chat.id} about {data['chat_id']} created at {datetime.now()}",
     }
     response = await session.post_task_schedule(task_schedule_data)
-    await callback.message.reply(str(task_schedule_data))
+    await callback.message.reply("Задача зарегистрирована")
     await state.clear()
     await callback.answer()
