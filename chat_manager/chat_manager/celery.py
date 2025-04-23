@@ -66,8 +66,11 @@ def perform_summary_on_chat(*args, **kwargs):
         'date': datetime.date.today(), 'chat': chat.id
     }
     serializer = serializers.ModelResponseSerializer(data=data)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
+    try:
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+    except ValueError:
+        pass
 
 celery_app.conf.update(
     imports=("chat_manager.celery",)

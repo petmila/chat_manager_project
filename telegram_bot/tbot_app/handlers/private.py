@@ -122,10 +122,10 @@ async def chats_handler_for_settings(callback: types.CallbackQuery, state: FSMCo
             'day_of_month': '*',
             'month_of_year': '*',
         },
-        'task': 'manager_app.celery.check_scheduled_tasks',
+        'task': 'celery.perform_summary_on_chat',
         'name': f"Resume for {callback.message.chat.id} about {data['chat_id']}",
     }
     response = await session.post_task_schedule(task_schedule_data)
-    await callback.message.reply("Оки, все будет")
+    await callback.message.reply(str(task_schedule_data))
     await state.clear()
     await callback.answer()

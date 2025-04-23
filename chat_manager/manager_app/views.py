@@ -144,13 +144,6 @@ class PeriodicTaskView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         request.data['kwargs']['content_chat'] = models.Chat.objects.get(source_chat_id=request.data['kwargs']['content_chat']).id
-        request.data['crontab'] = celery_beat.CrontabSchedule(
-            minute=request.data['crontab']['minute'],
-            hour=request.data['crontab']['hour'],
-            day_of_week=request.data['crontab']['day_of_week'],
-            day_of_month=request.data['crontab']['day_of_month'],
-            month_of_year=request.data['crontab']['month_of_year'],
-        )
         request.data['kwargs'] = str(request.data['kwargs'])
         serializer = serializers.PeriodicTaskSerializer(data=request.data)
         try:
