@@ -2,8 +2,11 @@ import os
 from celery import Celery
 from celery import shared_task
 from chat_manager import settings
-import llm_models
+import utils
 import datetime
+
+from utils.perform_summary import perform_summary
+from utils.rabbitmq_connection import send_to_bot_via_queue
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chat_manager.settings')
 
@@ -43,31 +46,22 @@ def perform_summary_on_chat(*args, **kwargs):
     source_chat_id = kwargs.get('source_chat_id')
     content_chat = kwargs.get('content_chat')
 
-    from manager_app import models, serializers
+    from manager_app import serializers
     from django_celery_beat.models import PeriodicTask
+    from rest_framework.exceptions import ValidationError
     
     task = PeriodicTask.objects.get(id=pt_id)
-
     first_date = datetime.datetime.today() - datetime.timedelta(days=1)
     last_date = datetime.datetime.today() + datetime.timedelta(days=1)
 
-    chat = models.Chat.objects.filter(id=int(content_chat)).first()
-    messages = models.Message.objects.filter(chat=chat,
-                                            timestamp__range=(first_date, last_date)).order_by('timestamp')
-    queryset = [
-        str(message) for message in messages
-    ]
-
-    model = llm_models.saiga_llm_chain.SaigaModel()
-    result = model.interact('-'.join(queryset))
-
-    data = {
-        'text': result,
-        'date': datetime.date.today(), 'chat': chat.id
-    }
+    data = perform_summary(int(content_chat), first_date, last_date)
     serializer = serializers.ModelResponseSerializer(data=data)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
+    try:
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+    except ValidationError:
+        data['text'] = "В системе отсутствуют сообщения за указанный период времени"
+    send_to_bot_via_queue(data)
 
 celery_app.conf.update(
     imports=("chat_manager.celery",)

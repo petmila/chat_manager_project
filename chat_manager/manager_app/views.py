@@ -8,11 +8,11 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-import llm_models.saiga_model
-import llm_models.text_preprocess
+import utils.saiga_model
+import utils.text_preprocess
 import django_celery_beat.models as celery_beat
-import llm_models.saiga_llm_chain
-from llm_models.text_preprocess import preprocess
+import utils.saiga_llm_chain
+from utils.text_preprocess import preprocess
 from manager_app import models, serializers
 from rest_framework import generics, status
 
@@ -69,28 +69,12 @@ class ModelResponseListView(generics.ListCreateAPIView):
     serializer_class = serializers.ModelResponseSerializer
 
     def create(self, request, *args, **kwargs):
-        first_date = request.data['first_date']
-        last_date = request.data['last_date']
         chat = models.Chat.objects.filter(source_chat_id=request.data['source_chat_id']).first()
+        data = utils.perform_summary.perform_summary(
+            chat_id=chat.id,
+            first_date=request.data['first_date'],
+            last_date=request.data['last_date'])
 
-        messages = models.Message.objects.filter(chat=chat,
-                                                 timestamp__range=(first_date, last_date)).order_by('timestamp')
-        queryset = [
-            str(message)
-            # if message.reply_source_message_id is None
-            # else str(message) + str(
-            #     models.Message.objects.filter(source_message_id=message.reply_source_message_id).first())
-            for message in messages
-        ]
-
-        print('-'.join(queryset))
-
-        model = llm_models.saiga_llm_chain.SaigaModel()
-        result = model.interact('-'.join(queryset))
-
-        data = {
-            'text': result,
-            'date': datetime.date.today(), 'chat': chat.id}
         serializer = serializers.ModelResponseSerializer(data=data)
         try:
             serializer.is_valid(raise_exception=True)
@@ -144,13 +128,6 @@ class PeriodicTaskView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         request.data['kwargs']['content_chat'] = models.Chat.objects.get(source_chat_id=request.data['kwargs']['content_chat']).id
-        request.data['crontab'] = celery_beat.CrontabSchedule(
-            minute=request.data['crontab']['minute'],
-            hour=request.data['crontab']['hour'],
-            day_of_week=request.data['crontab']['day_of_week'],
-            day_of_month=request.data['crontab']['day_of_month'],
-            month_of_year=request.data['crontab']['month_of_year'],
-        )
         request.data['kwargs'] = str(request.data['kwargs'])
         serializer = serializers.PeriodicTaskSerializer(data=request.data)
         try:
@@ -164,6 +141,6 @@ class PeriodicTaskView(generics.ListCreateAPIView):
 
 class LlamaTestView(TemplateView):
     def post(self, request, **kwargs):
-        model = llm_models.saiga_llm_chain.SaigaModel()
+        model = utils.saiga_llm_chain.SaigaModel()
         result = model.interact(request.POST['text'])
         return JsonResponse(result, safe=False, json_dumps_params={'ensure_ascii': False})
