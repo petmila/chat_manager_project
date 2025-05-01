@@ -1,4 +1,5 @@
 from django_celery_beat.schedulers import DatabaseScheduler
+import json
 
 class PatchedDatabaseScheduler(DatabaseScheduler):
     def apply_async(self, entry, producer=None, advance=True, **kwargs):
@@ -9,6 +10,6 @@ class PatchedDatabaseScheduler(DatabaseScheduler):
         else:
             task_kwargs = {}
 
-        task_kwargs['periodic_task_id'] = periodic_task_id
-        entry.kwargs = task_kwargs
+        task_kwargs["periodic_task_id"] = periodic_task_id
+        entry.kwargs = json.dumps(task_kwargs)
         return super().apply_async(entry, producer=producer, advance=advance, **kwargs)

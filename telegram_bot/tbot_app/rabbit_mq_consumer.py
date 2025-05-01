@@ -12,7 +12,7 @@ async def send_message(chat_id, text):
 async def process_message(message: aio_pika.IncomingMessage):
     async with message.process():
         data = message.body.decode()
-        chat_id = data["chat_id"]
+        chat_id = data["chat"]
         text = data["text"]
         print(text)
         asyncio.run(send_message(chat_id, text))

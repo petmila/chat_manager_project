@@ -109,21 +109,26 @@ async def chats_handler_for_settings(callback: types.CallbackQuery, state: FSMCo
     data = await state.get_data()
     hours, minutes = data['timestamp'].split(":")
     # freq = timedelta(hours=int(data['frequency']))
-    # next_run = datetime.today().replace(hour=int(hours), minute=int(minutes), second=0) + freq
+    start_time = datetime.today().replace(hour=int(hours), minute=int(minutes), second=0)
     task_schedule_data = {
-        'kwargs': {
-            'content_chat': data['chat_id'],
-            'source_chat_id': callback.message.chat.id,
+        "kwargs": {
+            "content_chat": data['chat_id'],
+            "source_chat_id": callback.message.chat.id,
         },
-        'crontab': {
-            'minute': minutes,
-            'hour': hours,
-            'day_of_week': '*',
-            'day_of_month': '*',
-            'month_of_year': '*',
+        "interval": {
+            "every": int(data['frequency']),
+            "period": "hours",
         },
-        'task': 'celery.perform_summary_on_chat',
-        'name': f"Resume for {callback.message.chat.id} about {data['chat_id']} created at {datetime.now()}",
+        # "crontab": {
+        #     "minute": minutes,
+        #     "hour": hours,
+        #     "day_of_week": '*',
+        #     "day_of_month": '*',
+        #     "month_of_year": '*',
+        # },
+        "start_time": start_time,
+        "task": "celery.perform_summary_on_chat",
+        "name": f"Resume for {callback.message.chat.id} about {data['chat_id']} created at {datetime.now()}"
     }
     response = await session.post_task_schedule(task_schedule_data)
     await callback.message.reply("Задача зарегистрирована")

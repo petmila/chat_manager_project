@@ -37,8 +37,10 @@ def save(text):
 @celery_app.task
 def perform_summary_on_chat(*args, **kwargs):
     """
-    source_chat_id: чат, в который нужно прислать результат
-    content_chat:   чат из которого генерируется резюме
+    kwargs:
+        source_chat_id: чат, в который нужно прислать результат
+        content_chat:   чат из которого генерируется резюме
+        periodic_task_id: 
     """
     pt_id = kwargs.get('periodic_task_id')
     source_chat_id = kwargs.get('source_chat_id')
@@ -51,21 +53,21 @@ def perform_summary_on_chat(*args, **kwargs):
     from utils.rabbitmq_connection import send_to_bot_via_queue
     
     task = PeriodicTask.objects.get(id=pt_id)
-    first_date = datetime.datetime.today() - datetime.timedelta(days=1)
-    last_date = datetime.datetime.today() + datetime.timedelta(days=1)
+    first_date = task.last_run_at
+    last_date = datetime.datetime.now()
     
     chat = models.Chat.objects.filter(id=int(content_chat)).first()
     messages = models.Message.objects.filter(chat=chat,
                                              timestamp__range=(first_date, last_date)).order_by('timestamp')
-    # TODO: source_chat_id
-    data = perform_summary(messages)
+    data = perform_summary(messages, chat_id=chat.id)
     serializer = serializers.ModelResponseSerializer(data=data)
     try:
         serializer.is_valid(raise_exception=True)
         serializer.save()
     except ValidationError:
         data['text'] = "В системе отсутствуют сообщения за указанный период времени"
-    send_to_bot_via_queue(data)
+    
+    send_to_bot_via_queue(data, receiver_chat_id=source_chat_id)
 
 celery_app.conf.update(
     imports=("chat_manager.celery",)

@@ -1,7 +1,8 @@
 import pika
 import json
 
-def send_to_bot_via_queue(data: dict):
+def send_to_bot_via_queue(data: dict, receiver_chat_id):
+    data['chat'] = receiver_chat_id
     connection = pika.BlockingConnection(pika.ConnectionParameters(host="rabbitmq"))
     channel = connection.channel()
     channel.queue_declare(queue="tg_bot_outbox", durable=True)

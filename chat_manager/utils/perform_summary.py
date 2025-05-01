@@ -3,7 +3,7 @@ import datetime
 from utils import saiga_llm_chain
 
 
-def perform_summary(messages):
+def perform_summary(messages, chat_id):
     
     queryset = [
         str(message)
@@ -17,5 +17,5 @@ def perform_summary(messages):
 
     return {
         'text': result,
-        'date': datetime.date.today(), 'chat': chat.id
+        'date': datetime.date.today(), 'chat': chat_id
     }
