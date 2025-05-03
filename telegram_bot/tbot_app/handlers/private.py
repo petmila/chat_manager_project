@@ -119,6 +119,7 @@ async def chats_handler_for_settings(callback: types.CallbackQuery, state: FSMCo
             "every": int(data['frequency']),
             "period": "hours",
         },
+
         # "crontab": {
         #     "minute": minutes,
         #     "hour": hours,
@@ -132,5 +133,6 @@ async def chats_handler_for_settings(callback: types.CallbackQuery, state: FSMCo
     }
     response = await session.post_task_schedule(task_schedule_data)
     await callback.message.reply("Задача зарегистрирована")
+
     await state.clear()
     await callback.answer()
