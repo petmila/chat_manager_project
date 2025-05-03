@@ -5,10 +5,15 @@ class ChatSource(models.TextChoices):
     telegram = 'Telegram', 'telegram'
     mattermost = 'Mattermost', 'mattermost'
 
+class GenerationSettings(models.Model):
+    frequency = models.DurationField(verbose_name="Frequency")
+    timestamp = models.TimeField(verbose_name="Time")
+
 class EmployeeAccount(models.Model):
     id = models.AutoField(primary_key=True)
     nickname = models.CharField(unique=True)
     source = models.CharField(choices=ChatSource, max_length=20, default=ChatSource.telegram)
+    # settings = models.ForeignKey(PrivateChatSettings, on_delete=models.CASCADE)
 
 class Employee(models.Model):
     id = models.AutoField(primary_key=True)
@@ -26,9 +31,7 @@ class ModelResponseStrategy(models.Model):
                                        """)
     n_context = models.IntegerField(verbose_name="n_context", default=4096)
 
-class GenerationSettings(models.Model):
-    frequency = models.DurationField(verbose_name="Frequency")
-    timestamp = models.TimeField(verbose_name="Time")
+
 
 class Chat(models.Model):
     source_chat_id = models.CharField(verbose_name="Source Chat ID", max_length=200, null=True, unique=True)

@@ -1,0 +1,7 @@
+aiohttp~=3.11.12
+aiogram~=3.17.0
+python-decouple~=3.8
+lxml~=5.3.1
+aiogram_calendar~=0.6.0
+pika
+aio_pika

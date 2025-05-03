@@ -4,6 +4,7 @@ import nltk
 from nltk import SnowballStemmer, word_tokenize
 from nltk.corpus import stopwords
 
+
 def preprocess(text):
     """
     Проводит лемматизацию, удаляет знаки препинания, стоп-слова
@@ -16,7 +17,7 @@ def preprocess(text):
 
     # Замена эмоджи на их описание
     text = emoji.demojize(text, language='ru')
-    text = ' '.join(text.split(':'))
+    # text = ' '.join(text.split(':'))
 
     # # Убираем стоп-слова
     # tokens = word_tokenize(text)
