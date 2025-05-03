@@ -197,14 +197,6 @@ class ChatBySourceDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.ChatSerializer
 
 
-@extend_schema(tags=["Резюме"])
-class ModelResponseDetailView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
-    queryset = models.ModelResponse.objects.all()
-    lookup_field = 'date'
-    serializer_class = serializers.ModelResponseSerializer
-
-
 class ChatsByEmployeeNicknameView(APIView):
     permission_classes = (IsAuthenticated,)
 
