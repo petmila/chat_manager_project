@@ -24,7 +24,6 @@ class SlugRelatedGetOrCreateField(serializers.SlugRelatedField):
             self.fail("invalid")
 
     def to_representation(self, obj):
-        """Возвращает только значение slug_field, а не весь объект"""
         return getattr(obj, self.slug_field)
 
 

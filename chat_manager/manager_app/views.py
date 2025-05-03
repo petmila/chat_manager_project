@@ -169,8 +169,15 @@ class GenerationSettingsListView(generics.ListAPIView):
 
 
 @extend_schema(tags=["Чаты"])
-class ChatListView(generics.ListAPIView):
+class ChatListView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.ChatSerializer
+    queryset = models.Chat.objects.all()
+
+@extend_schema(tags=["Чаты"])
+class ChatsBySourceListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    lookup_field = 'source'
     serializer_class = serializers.ChatSerializer
     queryset = models.Chat.objects.all()
 
@@ -178,7 +185,14 @@ class ChatListView(generics.ListAPIView):
 @extend_schema(tags=["Чаты"])
 class ChatDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAdminUser,)
-    lookup_field = 'name'
+    queryset = models.Chat.objects.all()
+    serializer_class = serializers.ChatSerializer
+
+
+@extend_schema(tags=["Чаты"])
+class ChatBySourceDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAdminUser,)
+    lookup_field = 'source_id'
     queryset = models.Chat.objects.all()
     serializer_class = serializers.ChatSerializer
 
