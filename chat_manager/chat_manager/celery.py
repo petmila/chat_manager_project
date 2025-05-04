@@ -54,6 +54,8 @@ def perform_summary_on_chat(*args, **kwargs):
     
     task = PeriodicTask.objects.get(id=pt_id)
     first_date = task.last_run_at
+    if first_date is None:
+        first_date = task.start_time
     last_date = datetime.datetime.now()
     
     chat = models.Chat.objects.filter(id=int(content_chat)).first()
