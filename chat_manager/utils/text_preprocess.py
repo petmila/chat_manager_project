@@ -7,14 +7,13 @@ from nltk.corpus import stopwords
 
 def preprocess(text):
     """
-    Проводит лемматизацию, удаляет знаки препинания, стоп-слова
+    Замена эмоджи на их текстовое описание,
     """
     # nltk.download('stopwords')
     # nltk.download('punkt_tab')
 
     # Убираем знаки препинания и переводим в нижний регистр
     text = ''.join([ch for ch in text if ch not in string.punctuation]).lower()
-
     # Замена эмоджи на их описание
     text = emoji.demojize(text, language='ru')
     # text = ' '.join(text.split(':'))

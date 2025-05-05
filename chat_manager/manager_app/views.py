@@ -9,10 +9,9 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
-import utils.saiga_model
 import utils.text_preprocess
 import django_celery_beat.models as celery_beat
-import utils.saiga_llm_chain
+import utils.summarizer_llm_chain
 from utils.text_preprocess import preprocess
 from manager_app import models, serializers
 from rest_framework import generics, status
@@ -251,6 +250,6 @@ class PeriodicTaskDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class LlamaTestView(TemplateView):
     def post(self, request, **kwargs):
-        model = utils.saiga_llm_chain.SaigaModel()
+        model = utils.summarizer_llm_chain.Summarizer()
         result = model.interact(request.POST['text'])
         return JsonResponse(result, safe=False, json_dumps_params={'ensure_ascii': False})

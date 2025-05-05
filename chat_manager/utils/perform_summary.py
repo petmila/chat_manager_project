@@ -1,6 +1,6 @@
 import datetime
 
-from utils import saiga_llm_chain
+from utils import summarizer_llm_chain
 
 
 def perform_summary(messages, chat_id):
@@ -12,7 +12,7 @@ def perform_summary(messages, chat_id):
         #     models.Message.objects.filter(source_message_id=message.reply_source_message_id).first())
         for message in messages
     ]
-    model = saiga_llm_chain.SaigaModel()
+    model = summarizer_llm_chain.Summarizer()
     result = model.interact('-'.join(queryset))
 
     return {

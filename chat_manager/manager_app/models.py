@@ -5,6 +5,9 @@ class ChatSource(models.TextChoices):
     telegram = 'Telegram', 'telegram'
     mattermost = 'Mattermost', 'mattermost'
 
+class ModelFileExtension(models.TextChoices):
+    gguf = 'GGUF', 'gguf'
+
 class GenerationSettings(models.Model):
     frequency = models.DurationField(verbose_name="Frequency")
     timestamp = models.TimeField(verbose_name="Time")
@@ -24,12 +27,16 @@ class Employee(models.Model):
 
 class ModelResponseStrategy(models.Model):
     strategy_name = models.CharField(verbose_name="Name", max_length=200)
+    model_name = models.CharField(verbose_name="Model Name", max_length=255)
+    model_file_extension = models.CharField(verbose_name="Model File Extension",
+                                            choices=ModelFileExtension, max_length=20,
+                                            default=ModelFileExtension.gguf)
     prompt_template = models.TextField(verbose_name="Prompt Template",
                                        default="""Сделай краткое тезисное резюме, расскажи, о кем разговаривали и к каким выводам пришли люди в тексте ниже:
                                         ```{текст}```
                                         Резюме:
                                        """)
-    n_context = models.IntegerField(verbose_name="n_context", default=4096)
+    n_context = models.IntegerField(verbose_name="n_context", default=8192)
 
 
 
