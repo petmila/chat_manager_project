@@ -13,7 +13,7 @@ class Summarizer:
     def __init__(self,
                  max_ctx_size: int = 8192,
                  model_path: str = config("MODEL_PATH"),
-                 template: str = config('DEFAULT_PROMPT')):
+                 template: str = config("DEFAULT_PROMPT")):
         kwargs = {"model_path": model_path, "n_ctx": max_ctx_size,
                   "max_tokens": max_ctx_size,
                   "n_gpu_layers": 10, "n_batch": max_ctx_size,
@@ -32,7 +32,7 @@ class Summarizer:
             logging.error(f"Ошибка при генерации резюме: {e}")
             return "[Ошибка при генерации]"
 
-    def interact(self, query: str) -> str:
+    def interact(self, query: list[dict]) -> str:
         chunks = self.text_splitter.split_text(query)
         logging.info(f"Разбито на {len(chunks)} чанков")
         summaries = []

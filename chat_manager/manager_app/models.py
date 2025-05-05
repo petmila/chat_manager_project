@@ -1,5 +1,7 @@
 import datetime
 from django.db import models
+from pgvector.django import VectorField
+from pgvector.django import HnswIndex
 
 class ChatSource(models.TextChoices):
     telegram = 'Telegram', 'telegram'
@@ -54,10 +56,33 @@ class Message(models.Model):
     source_message_id = models.IntegerField(verbose_name="Source Message ID", null=True)
     reply_source_message_id = models.IntegerField(verbose_name="Reply Source Message ID", null=True)
 
-    def __str__(self):
-        if self.reply_source_message_id is not None:
-            return f"{self.employee_account.nickname} написал {self.text} в ответ на "
-        return f"{self.employee_account.nickname} написал {self.text}\n"
+    def format(self):
+        # if self.reply_source_message_id is not None:
+        #     return {"message": self.text,
+        #             "nickname": self.employee_account.nickname,
+        #             "replying": ""}
+        return {"message": self.text,
+                "nickname": self.employee_account.nickname}
+
+class MessageEmbedding(models.Model):
+    message_id = models.OneToOneField(Message, on_delete=models.CASCADE)
+    embedding = VectorField(
+        dimensions=768,
+         help_text="Vector embeddings of the file content",
+         null=True,
+         blank=True
+    )
+
+    class Meta:
+        indexes = [
+            HnswIndex(
+                name="clip_l14_vectors_index",
+                fields=["embedding_clip_vit_l_14"],
+                m=16,
+                ef_construction=64,
+                opclasses=["vector_cosine_ops"],
+            )
+        ]
 
 
 class ModelResponse(models.Model):

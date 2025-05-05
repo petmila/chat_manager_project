@@ -12,7 +12,7 @@ class MessageChunkSplitter:
         current_tokens = 0
 
         for message in messages:
-            formatted = self._format_message(message["author"], message["text"])
+            formatted = self._format_message(message["nickname"], message["message"])
             message_tokens = len(self.tokenizer.encode(formatted))
 
             if current_tokens + message_tokens > self.max_tokens:
