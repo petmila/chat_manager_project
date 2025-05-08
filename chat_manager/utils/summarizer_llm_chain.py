@@ -7,20 +7,32 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.llms import LlamaCpp
 from langchain_core.output_parsers import StrOutputParser
 
-import text_splitter
+from utils.text_splitter import MessageChunkSplitter
+
+DEFAULT_PROMPT="""
+<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+Ты — Сайга, русскоязычный автоматический ассистент. Ты разговариваешь с людьми и помогаешь им.
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Kратко и тезисно резюмируй переданный текст
+Формируя резюме, руководствуйся следующими правилами: указывай пунктами все важные задачи и кто их должен сделать, всегда пиши на русском языке, не пиши больше 3 предложений и не включай инструкции в финальный результат
+Используй только html теги для форматирования, не вставляй прямые цитаты из текста в ответ
+Текст: {text}
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Резюме:
+"""
 
 class Summarizer:
     def __init__(self,
                  max_ctx_size: int = 8192,
                  model_path: str = config("MODEL_PATH"),
-                 template: str = config("DEFAULT_PROMPT")):
+                 template: str = DEFAULT_PROMPT):
         kwargs = {"model_path": model_path, "n_ctx": max_ctx_size,
                   "max_tokens": max_ctx_size,
                   "n_gpu_layers": 10, "n_batch": max_ctx_size,
                   "temperature": 0.2}
 
         self._model_instance = LlamaCpp(**kwargs)
-        self.text_splitter = text_splitter.MessageChunkSplitter()
+        self.text_splitter = MessageChunkSplitter()
 
         self.prompt = PromptTemplate(template=template, input_variables=["text"])
         self.chain = self.prompt | self._model_instance | StrOutputParser()

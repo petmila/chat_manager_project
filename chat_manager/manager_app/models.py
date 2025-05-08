@@ -29,7 +29,7 @@ class Employee(models.Model):
 
 class ModelResponseStrategy(models.Model):
     strategy_name = models.CharField(verbose_name="Name", max_length=200)
-    model_name = models.CharField(verbose_name="Model Name", max_length=255)
+    model_name = models.CharField(verbose_name="Model Name", max_length=255, default="model-q4_K")
     model_file_extension = models.CharField(verbose_name="Model File Extension",
                                             choices=ModelFileExtension, max_length=20,
                                             default=ModelFileExtension.gguf)
@@ -65,7 +65,7 @@ class Message(models.Model):
                 "nickname": self.employee_account.nickname}
 
 class MessageEmbedding(models.Model):
-    message_id = models.OneToOneField(Message, on_delete=models.CASCADE)
+    message = models.OneToOneField(Message, on_delete=models.CASCADE)
     embedding = VectorField(
         dimensions=768,
          help_text="Vector embeddings of the file content",
@@ -73,16 +73,16 @@ class MessageEmbedding(models.Model):
          blank=True
     )
 
-    class Meta:
-        indexes = [
-            HnswIndex(
-                name="clip_l14_vectors_index",
-                fields=["embedding_clip_vit_l_14"],
-                m=16,
-                ef_construction=64,
-                opclasses=["vector_cosine_ops"],
-            )
-        ]
+    # class Meta:
+    #     indexes = [
+    #         HnswIndex(
+    #             name="clip_l14_vectors_index",
+    #             fields=["embedding_clip_vit_l_14"],
+    #             m=16,
+    #             ef_construction=64,
+    #             opclasses=["vector_cosine_ops"],
+    #         )
+    #     ]
 
 
 class ModelResponse(models.Model):

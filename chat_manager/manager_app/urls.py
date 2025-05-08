@@ -2,7 +2,8 @@ from django.urls import path
 from manager_app.views import (ModelResponseListView, ModelResponseDetailView, PeriodicTaskView,
                                MessageListView, EmployeeListView, EmployeeAccountListView, EmployeeDetailView,
                                EmployeeAccountDetailView, PeriodicTaskDetailView, ChatDetailView, MessageDetailView,
-                               MessagesByDateView, ChatsBySourceListView, ModelResponseByDateView, LlamaTestView, ChatListView, ChatsByEmployeeNicknameView)
+                                MessagesByChatView, MessagesByDateView, ChatsBySourceListView, ModelResponseByDateView, 
+                                LlamaTestView, ChatListView, ChatsByEmployeeNicknameView)
 
 urlpatterns = [
     path("summary/", ModelResponseListView.as_view(), name="summary-list"),
@@ -26,6 +27,7 @@ urlpatterns = [
     path("message/", MessageListView.as_view(), name="message-list"),
     path("message-delete/", MessageDetailView.as_view(), name="message-delete"),
     path("message/by-date/<str:date>/", MessagesByDateView.as_view(), name="message_by_date"),
+    path("message/by-chat/<int:chat_id>/", MessagesByChatView.as_view(), name="message_by_chat"),
 
     path("test-view/", LlamaTestView.as_view(), name="test-view")
 ]

@@ -9,7 +9,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
-import utils.text_preprocess
+from utils.perform_summary import perform_summary
 import django_celery_beat.models as celery_beat
 import utils.summarizer_llm_chain
 from utils.text_preprocess import preprocess
@@ -97,6 +97,22 @@ class MessagesByDateView(APIView):
         messages = models.Message.objects.filter(timestamp=date).order_by('timestamp')
         return Response(messages)
 
+class MessagesByChatView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.MessageSerializer
+
+    @extend_schema(
+        tags=["Сообщения"],
+        description="Фильтрация сообщений по чату источнику",
+        parameters=[
+            OpenApiParameter(name='chat', type=int, location=OpenApiParameter.PATH, description='Чат id'),
+        ],
+        responses={200: OpenApiTypes.OBJECT}
+    )
+    def get(self, request, chat_id):
+        messages = models.Message.objects.filter(chat_id=chat_id)
+        return Response(messages)
+
 
 @extend_schema(tags=["Сообщения"])
 class MessageDetailView(generics.DestroyAPIView):
@@ -117,7 +133,7 @@ class ModelResponseListView(generics.ListCreateAPIView):
         last_date = request.data['last_date']
         messages = models.Message.objects.filter(chat=chat,
                                                  timestamp__range=(first_date, last_date)).order_by('timestamp')
-        data = utils.perform_summary.perform_summary(messages=messages, chat_id=chat.id)
+        data = perform_summary(messages=messages, chat_id=chat.id)
 
         serializer = serializers.ModelResponseSerializer(data=data)
         try:
