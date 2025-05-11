@@ -1,6 +1,7 @@
 from django_celery_beat.schedulers import DatabaseScheduler
 import json
 
+
 class PatchedDatabaseScheduler(DatabaseScheduler):
     def apply_async(self, entry, producer=None, advance=True, **kwargs):
         periodic_task_id = entry.model.id

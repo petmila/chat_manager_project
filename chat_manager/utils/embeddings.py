@@ -1,14 +1,14 @@
 from pgvector.django import CosineDistance
 
-from manager_app.models import MessageEmbedding
+from manager_app import models
 
 
-def search_embeddings(self, embedding, chat_id):
+def similarity_search(embedding, chat_id):
+    messages = models.Message.objects.filter(chat_id=chat_id,
+                                                 timestamp__range=(first_date, last_date)).order_by('timestamp')
 
-    user_files = MessageEmbedding.objects.filter()
-
-    files_with_distance = user_files.annotate(
-        distance=CosineDistance("embedding_clip_vit_l_14", embedding)
+    files_with_distance = messages .annotate(
+        distance=CosineDistance("embedding", embedding)
     ).order_by("distance")[:12]
 
-    # Process and return the search results
+    return files_with_distance

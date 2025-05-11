@@ -72,17 +72,16 @@ class MessageEmbedding(models.Model):
          null=True,
          blank=True
     )
-
-    # class Meta:
-    #     indexes = [
-    #         HnswIndex(
-    #             name="clip_l14_vectors_index",
-    #             fields=["embedding_clip_vit_l_14"],
-    #             m=16,
-    #             ef_construction=64,
-    #             opclasses=["vector_cosine_ops"],
-    #         )
-    #     ]
+    class Meta:
+        indexes = [
+            HnswIndex(
+                name="clip_l14_vectors_index",
+                fields=["embedding"],
+                m=16,
+                ef_construction=64,
+                opclasses=["vector_cosine_ops"],
+            )
+        ]
 
 
 class ModelResponse(models.Model):
