@@ -13,6 +13,7 @@ from tbot_app.filters.chat_type import ChatTypeFilter
 from tbot_app.handlers.summary import summary_request, html_validation
 from tbot_app.keyboards.inline_keyboard import make_inline_keyboard
 from tbot_app.states import PrivateSummary,  PrivateAutoGenerationSettings
+from tbot_app.utils.timestamp_parsing import timestamp_parse
 
 router = Router()
 router.message.filter(
@@ -55,6 +56,7 @@ async def process_calendar(callback: CallbackQuery, callback_data: CallbackData,
     selected, date_ = await calendar.process_selection(callback, callback_data)
     if selected:
         await callback.message.edit_text("Wait for your summary")
+        await callback.answer()
         summary = await summary_request(session, data['chat_id'], first_date=date_, last_date=date_ + timedelta(days=1))
         if html_validation(summary):
             await callback.message.answer(summary, parse_mode=ParseMode.HTML)
@@ -73,10 +75,7 @@ async def process_calendar(callback: CallbackQuery, callback_data: CallbackData,
     
 @router.message(Command("settings"))
 async def settings_handler(message: types.Message, state: FSMContext):
-    # chats = await session.get_chats_by_nickname(message.from_user.username)
     chats_keyboard = {"freq__24": "Каждые 24 часа", "freq__168": "Каждую неделю", "freq__72": "Каждые 3 дня"}
-    # for chat_name, chat_id in chats.items():
-    #     chats_keyboard[f"chat__{chat_id}"] = chat_name
     await state.set_state(PrivateAutoGenerationSettings.frequency)
     await message.reply(text="В боте доступна автоматическая генерация резюме. Выберите частоту генерации",
                         reply_markup=make_inline_keyboard(chats_keyboard))
@@ -93,8 +92,7 @@ async def chats_handler(callback: types.CallbackQuery, state: FSMContext):
 
 @router.message(PrivateAutoGenerationSettings.timestamp)
 async def process_timestamp(message_: types.Message, state: FSMContext):
-    # time_ = datetime.strptime(message_.text, '%H:%M').time()
-    await state.update_data(timestamp=message_.text)
+    await state.update_data(timestamp=timestamp_parse(message_.text))
     chats = await session.get_chats_by_nickname(message_.from_user.username)
     chats_keyboard = {}
     for chat_name, chat_id in chats.items():
@@ -107,9 +105,7 @@ async def process_timestamp(message_: types.Message, state: FSMContext):
 async def chats_handler_for_settings(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(chat_id=callback.data.split("__")[1])
     data = await state.get_data()
-    hours, minutes = data['timestamp'].split(":")
-    # freq = timedelta(hours=int(data['frequency']))
-    start_time = datetime.today().replace(hour=int(hours), minute=int(minutes), second=0)
+    start_time = data['timestamp']
     task_schedule_data = {
         "kwargs": {
             "content_chat": data['chat_id'],
@@ -131,8 +127,8 @@ async def chats_handler_for_settings(callback: types.CallbackQuery, state: FSMCo
         "task": "celery.perform_summary_on_chat",
         "name": f"Resume for {callback.message.chat.id} about {data['chat_id']} created at {datetime.now()}"
     }
+    await callback.answer()
     response = await session.post_task_schedule(task_schedule_data)
     await callback.message.reply("Задача зарегистрирована")
-
     await state.clear()
-    await callback.answer()
+    

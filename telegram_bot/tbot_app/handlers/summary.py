@@ -50,34 +50,39 @@ def html_validation(html_string):
 @router.callback_query(F.data == "today_summary")
 async def summary_for_today_handler(callback: types.CallbackQuery):
     date_ = datetime.today().replace(hour=0, minute=0, second=0)
+    await callback.answer()
     summary = await summary_request(session, callback.message.chat.id, date_, date_ + timedelta(days=1))
+    
     if html_validation(summary):
         await callback.message.reply(summary, parse_mode=ParseMode.HTML)
     else:
         await callback.message.reply(summary)
-    await callback.answer()
+    
 
 @router.callback_query(F.data == "yesterday_summary")
 async def summary_for_yesterday_handler(callback: types.CallbackQuery):
     date_ = datetime.today().replace(hour=0, minute=0, second=0)
+    await callback.answer()
     summary = await summary_request(session, callback.message.chat.id,
-                                    first_date=date_, last_date=date_ + timedelta(days=1))
+                                    first_date=date_ - timedelta(days=1), last_date=date_)
+    
     if html_validation(summary):
         await callback.message.reply(summary, parse_mode=ParseMode.HTML)
     else:
         await callback.message.reply(summary)
-    await callback.answer()
-
+    
 @router.callback_query(F.data == "this_week_summary")
 async def summary_for_week_handler(callback: types.CallbackQuery):
     date_ = datetime.today().replace(hour=0, minute=0, second=0)
+    await callback.answer()
     summary = await summary_request(session, callback.message.chat.id,
-                                    first_date=date_, last_date=date_ + timedelta(days=1))
+                                    first_date=date_ - timedelta(days=7), last_date=date_)
+    
     if html_validation(summary):
         await callback.message.reply(summary, parse_mode=ParseMode.HTML)
     else:
         await callback.message.reply(summary)
-    await callback.answer()
+    
 
 
 @router.callback_query(F.data == "calendar_summary")
@@ -99,6 +104,7 @@ async def process_calendar(callback: CallbackQuery, callback_data: CallbackData)
     selected, date_ = await calendar.process_selection(callback, callback_data)
     if selected:
         await callback.message.edit_text("Wait for your summary")
+        await callback.answer()
         summary = await summary_request(session, callback.message.chat.id, date_, date_ + timedelta(days=1))
         if html_validation(summary):
             await callback.message.answer(summary, parse_mode=ParseMode.HTML)

@@ -12,5 +12,5 @@ class PatchedDatabaseScheduler(DatabaseScheduler):
             task_kwargs = {}
 
         task_kwargs["periodic_task_id"] = periodic_task_id
-        entry.kwargs = json.dumps(task_kwargs)
+        entry.kwargs = task_kwargs
         return super().apply_async(entry, producer=producer, advance=advance, **kwargs)

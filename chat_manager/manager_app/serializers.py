@@ -105,16 +105,18 @@ class PeriodicTaskSerializer(serializers.ModelSerializer):
     interval = SlugRelatedGetOrCreateField(
         many=False,
         queryset=celery_beat.IntervalSchedule.objects.all(),
-        slug_field='id'
+        slug_field='id',
+        help_text='Объект IntervalSchedule. Можно указать ID существующего объекта '
+                  'или передать словарь {"every": int, "period": str} для создания нового.'
     )
 
     class Meta:
         model = celery_beat.PeriodicTask
         fields = ['id', 'name', 'interval', 'task', 'kwargs', 'start_time']
         extra_kwargs = {
-            'name': {'help_text': ''},
-            'task': {'help_text': ''},
+            'name': {'help_text': 'Уникальное имя задачи'},
+            'task': {'help_text': 'Название функции, вызов которой является задачей'},
             'start_time': {'help_text': 'Время начала выполнения задачи'},
-            'interval': {'help_text': ''},
-            'kwargs': {'help_text': ''},
+            'interval': {'help_text': 'ID для Interval с параметрами {"every": int, "period": str}'},
+            'kwargs': {'help_text': 'Позиционные параметры для вызова функции task'},
         }

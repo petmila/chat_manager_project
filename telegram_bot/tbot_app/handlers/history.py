@@ -1,8 +1,8 @@
 from aiogram import Router, types
-from aiogram.filters import Command, CommandObject
+from aiogram.filters import Command
 
 from tbot_app.app import session, bot
-from tbot_app.chat_history_parsing import parse_chat_history
+from tbot_app.utils.chat_history_parsing import parse_chat_history
 from tbot_app.filters.chat_type import ChatTypeFilter
 
 router = Router()
