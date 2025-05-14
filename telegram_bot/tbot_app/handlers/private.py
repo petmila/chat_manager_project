@@ -10,7 +10,7 @@ from aiogram_calendar import SimpleCalendar, get_user_locale, SimpleCalendarCall
 
 from tbot_app import session
 from tbot_app.filters.chat_type import ChatTypeFilter
-from tbot_app.handlers.summary import summary_request, html_validation
+from tbot_app.handlers.summary import summary_request
 from tbot_app.keyboards.inline_keyboard import make_inline_keyboard
 from tbot_app.states import PrivateSummary,  PrivateAutoGenerationSettings
 from tbot_app.utils.timestamp_parsing import timestamp_parse
@@ -58,10 +58,7 @@ async def process_calendar(callback: CallbackQuery, callback_data: CallbackData,
         await callback.message.edit_text("Wait for your summary")
         await callback.answer()
         summary = await summary_request(session, data['chat_id'], first_date=date_, last_date=date_ + timedelta(days=1))
-        if html_validation(summary):
-            await callback.message.answer(summary, parse_mode=ParseMode.HTML)
-        else:
-            await callback.message.answer(f"Вот твое резюме:\n{summary}")
+        await callback.message.answer(summary)
 
 # @router.message(Command("chats"))
 # async def chats_handler(message: types.Message):

@@ -39,24 +39,13 @@ async def summary_request(session_, source_chat_id, first_date, last_date):
     else:
         return f"No messages for dates from {first_date} to {last_date}"
 
-def html_validation(html_string):
-    try:
-        parser = html.HTMLParser()
-        etree.fromstring(html_string, parser)
-        return True
-    except etree.XMLSyntaxError:
-        return False
-
 @router.callback_query(F.data == "today_summary")
 async def summary_for_today_handler(callback: types.CallbackQuery):
     date_ = datetime.today().replace(hour=0, minute=0, second=0)
     await callback.answer()
     summary = await summary_request(session, callback.message.chat.id, date_, date_ + timedelta(days=1))
     
-    if html_validation(summary):
-        await callback.message.reply(summary, parse_mode=ParseMode.HTML)
-    else:
-        await callback.message.reply(summary)
+    await callback.message.reply(summary)
     
 
 @router.callback_query(F.data == "yesterday_summary")
@@ -66,10 +55,7 @@ async def summary_for_yesterday_handler(callback: types.CallbackQuery):
     summary = await summary_request(session, callback.message.chat.id,
                                     first_date=date_ - timedelta(days=1), last_date=date_)
     
-    if html_validation(summary):
-        await callback.message.reply(summary, parse_mode=ParseMode.HTML)
-    else:
-        await callback.message.reply(summary)
+    await callback.message.reply(summary)
     
 @router.callback_query(F.data == "this_week_summary")
 async def summary_for_week_handler(callback: types.CallbackQuery):
@@ -78,10 +64,7 @@ async def summary_for_week_handler(callback: types.CallbackQuery):
     summary = await summary_request(session, callback.message.chat.id,
                                     first_date=date_ - timedelta(days=7), last_date=date_)
     
-    if html_validation(summary):
-        await callback.message.reply(summary, parse_mode=ParseMode.HTML)
-    else:
-        await callback.message.reply(summary)
+    await callback.message.reply(summary)
     
 
 
@@ -106,7 +89,4 @@ async def process_calendar(callback: CallbackQuery, callback_data: CallbackData)
         await callback.message.edit_text("Wait for your summary")
         await callback.answer()
         summary = await summary_request(session, callback.message.chat.id, date_, date_ + timedelta(days=1))
-        if html_validation(summary):
-            await callback.message.answer(summary, parse_mode=ParseMode.HTML)
-        else:
-            await callback.message.answer(f"Вот твое резюме:\n{summary}")
+        await callback.message.answer(summary)
