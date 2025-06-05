@@ -45,7 +45,7 @@ docker volume create chat_manager_project_llm_model
 Переместить в него `.gguf` файл
 
 ```bash
-docker volume create chat_manager_project_llm_model
+docker run --rm -v chat_manager_project_llm_model:/mnt -v chat_manager_project/ggml-model-Q4_K_M.gguf:/tmp/model-q4_K.gguf busybox sh -c "cp /tmp/model-q4_K.gguf /mnt/"
 ```
 
 ### 4. Настройка `.env` файлов
