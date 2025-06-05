@@ -1,4 +1,4 @@
-import pika
+import aio_pika
 import json
 
 
@@ -7,31 +7,31 @@ class RabbitMQConnection:
         self.host = host
         self.connection = None
         self.channel = None
-        self.connect()
 
-    def connect(self):
-        """Создаёт соединение"""
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host, heartbeat=600))
-        self.channel = self.connection.channel()
-        self.channel.confirm_delivery()
+    async def connect(self):
+        """Создаёт асинхронное соединение и канал"""
+        self.connection = await aio_pika.connect_robust(f"amqp://{self.host}/")
+        self.channel = await self.connection.channel()
+        await self.channel.set_qos(prefetch_count=10)
 
-    def _ensure_connection(self):
+    async def _ensure_connection(self):
         """Переподключение при закрытом соединении"""
         if not self.connection or self.connection.is_closed:
-            self.connect()
+            await self.connect()
 
-    def send_message(self, queue_name, message):
+    async def send_message(self, queue_name, message: dict):
         """Отправляет сообщение в очередь"""
-        self._ensure_connection()
-        self.channel.queue_declare(queue=queue_name, durable=True)
-        self.channel.basic_publish(
-            exchange="",
-            routing_key=queue_name,
-            body=json.dumps(message, default=str),
-            properties=pika.BasicProperties(delivery_mode=2)
+        await self._ensure_connection()
+        queue = await self.channel.declare_queue(queue_name, durable=True)
+        await self.channel.default_exchange.publish(
+            aio_pika.Message(
+                body=json.dumps(message, default=str).encode(),
+                delivery_mode=aio_pika.DeliveryMode.PERSISTENT
+            ),
+            routing_key=queue.name
         )
 
-    def close(self):
+    async def close(self):
         """Закрывает соединение"""
-        if self.connection and self.connection.is_open:
-            self.connection.close()
+        if self.connection:
+            await self.connection.close()
