@@ -1,0 +1,125 @@
+version: '3.11'
+
+services:
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - chat_network
+
+  django_app:
+    image: image_django_app
+    container_name: django-app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    environment:
+      - DJANGO_SETTINGS_MODULE=chat_manager.settings
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+    ports:
+      - "8000:8000"
+    networks:
+      - chat_network
+    env_file:
+      - ./chat_manager/.env
+    volumes:
+      - chat_manager_project_llm_model:/app/data
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: db-container
+    restart: always
+    ports:
+      - 15402:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -p 5432 -d chat_manager_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - chat_network
+    env_file:
+      - ./chat_manager/.env
+    
+  
+  rabbitmq_consumer:
+    image: image_django_app
+    command: python manage.py rabbitmq_consumer
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      django_app:
+        condition: service_started
+    networks:
+      - chat_network
+    volumes:
+      - chat_manager_project_llm_model:/app/data
+
+  telegram_bot:
+    build: ./telegram_bot
+    container_name: telegram-bot
+    restart: always
+    depends_on:
+      django_app:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      DJANGO_API_URL: http://django-app
+    networks:
+      - chat_network
+    env_file:
+      - ./telegram_bot/.env
+  
+  celery:
+    image: image_django_app
+    command: celery -A chat_manager worker -Q celery -l debug
+    depends_on:
+      rabbitmq:
+        condition: service_started
+    networks:
+      - chat_network
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - DJANGO_SETTINGS_MODULE=chat_manager.settings
+    volumes:
+      - chat_manager_project_llm_model:/app/data
+  
+  celery-beat:
+    image: image_django_app
+    command: celery -A chat_manager beat -l debug --scheduler chat_manager.scheduler.PatchedDatabaseScheduler
+    networks:
+      - chat_network
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      django_app:
+        condition: service_started
+      celery:
+        condition: service_started
+    environment:
+      - DJANGO_SETTINGS_MODULE=chat_manager.settings
+    volumes:
+      - chat_manager_project_llm_model:/app/data
+
+networks:
+  chat_network:
+    driver: bridge
+
+volumes:
+  db_data:
+  chat_manager_project_llm_model:
+    external: true

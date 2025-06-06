@@ -13,3 +13,12 @@ telegram_bot/.env
 /chat_manager/manager_app/migrations
 /chat_manager/manager_app/migrations
 /chat_manager/manager_app/migrations
+chat_manager/__pycache__/manage.cpython-311.pyc
+chat_manager/tests/__pycache__/__init__.cpython-311.pyc
+chat_manager/tests/__pycache__/models.cpython-311.pyc
+/telegram_bot/tbot_app/filters/__pycache__
+/telegram_bot/tbot_app/keyboards/__pycache__
+chat_manager/model-q4_K.gguf
+*.pgerd
+*.gguf
+*.env
