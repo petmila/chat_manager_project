@@ -25,16 +25,5 @@ async def message_save(message: types.Message):
                 'chat_source': 'Telegram',
                 'name': message.chat.title,
             }}
-    # await session.post_message(data)
-    connection.send_message(message=data, queue_name="updates_queue")
-
-# @router.message(F.content_type.in_({'file'}))
-# async def history_save(message: types.Message):
-#     data = {'text': message.text, 'timestamp': message.date,
-#             "user": {"username": message.from_user.username,
-#                      "first_name": message.from_user.first_name,
-#                      "last_name": message.from_user.last_name},
-#             "source": 'Telegram',
-#             "source_chat_id": message.chat.id}
-#     input_ = await post_message(data)
-#     await message.reply(f'{input_} вот что я сохранил в бд {message.from_user.username}')
+    await connection.send_message(message=data, queue_name="updates_queue")
+    

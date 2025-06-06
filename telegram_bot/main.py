@@ -1,5 +1,4 @@
 import asyncio
-import signal
 from tbot_app import bot, dp, connection, session
 from tbot_app.handlers import summary, saving, history, private
 from tbot_app.rabbit_mq_consumer import start_async_consumer

@@ -1,5 +1,4 @@
 from django_celery_beat.schedulers import DatabaseScheduler
-import json
 
 
 class PatchedDatabaseScheduler(DatabaseScheduler):

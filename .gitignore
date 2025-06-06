@@ -21,5 +21,4 @@ chat_manager/tests/__pycache__/models.cpython-311.pyc
 chat_manager/model-q4_K.gguf
 *.pgerd
 *.gguf
-erd.pgerd
-model-q4_K.gguf
+*.env

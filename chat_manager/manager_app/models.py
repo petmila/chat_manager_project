@@ -2,6 +2,7 @@ import datetime
 from django.db import models
 from pgvector.django import VectorField
 from pgvector.django import HnswIndex
+from utils import text_preprocess
 
 class ChatSource(models.TextChoices):
     telegram = 'Telegram', 'telegram'
@@ -18,7 +19,6 @@ class EmployeeAccount(models.Model):
     id = models.AutoField(primary_key=True)
     nickname = models.CharField(unique=True)
     source = models.CharField(choices=ChatSource, max_length=20, default=ChatSource.telegram)
-    # settings = models.ForeignKey(PrivateChatSettings, on_delete=models.CASCADE)
 
 class Employee(models.Model):
     id = models.AutoField(primary_key=True)
@@ -61,7 +61,7 @@ class Message(models.Model):
         #     return {"message": self.text,
         #             "nickname": self.employee_account.nickname,
         #             "replying": ""}
-        return {"message": self.text,
+        return {"message": text_preprocess.demojize(self.text),
                 "nickname": self.employee_account.nickname}
 
 class MessageEmbedding(models.Model):

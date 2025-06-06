@@ -1,4 +1,3 @@
-import datetime
 import json
 
 from django.http import JsonResponse
@@ -12,10 +11,9 @@ from rest_framework.response import Response
 from utils.perform_summary import perform_summary
 import django_celery_beat.models as celery_beat
 import utils.summarizer_llm_chain
-from utils.text_preprocess import preprocess
 from manager_app import models, serializers
 from rest_framework import generics, status
-from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter, OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 from manager_app.models import EmployeeAccount
 
@@ -69,7 +67,7 @@ class MessageListView(generics.ListCreateAPIView):
                 request.data['employee_account']['nickname'] = request.data['forward_from']
             else:
                 request.data['text'] = 'согласно словам ' + request.data['forward_from'] + ' ' + request.data['text']
-        request.data['text'] = preprocess(request.data['text'])
+
         serializer = serializers.MessageSerializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
@@ -266,6 +264,9 @@ class PeriodicTaskDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class LlamaTestView(TemplateView):
     def post(self, request, **kwargs):
+        """
+        Предоставляет доступ к генерации резюме на основе переданного текста для тестов модели
+        """
         model = utils.summarizer_llm_chain.Summarizer()
         result = model.interact(request.POST['text'])
         return JsonResponse(result, safe=False, json_dumps_params={'ensure_ascii': False})

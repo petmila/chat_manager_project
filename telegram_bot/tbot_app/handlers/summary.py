@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
-from lxml import etree, html
 from aiogram import types, Router, F
 from aiogram.filters import Command
 from aiogram.filters.callback_data import CallbackData
 
-from aiogram.enums import ParseMode
 from aiogram.types import CallbackQuery
 from aiogram_calendar import SimpleCalendar, SimpleCalendarCallback, get_user_locale
 

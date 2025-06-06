@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
 
 from aiogram import types, Router, F
-from aiogram.enums import ParseMode
-from aiogram.filters import Command, StateFilter
+from aiogram.filters import Command
 from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
@@ -60,16 +59,6 @@ async def process_calendar(callback: CallbackQuery, callback_data: CallbackData,
         summary = await summary_request(session, data['chat_id'], first_date=date_, last_date=date_ + timedelta(days=1))
         await callback.message.answer(summary)
 
-# @router.message(Command("chats"))
-# async def chats_handler(message: types.Message):
-#     await message.reply(text="Какое резюме ты хочешь получить?",
-#         reply_markup=make_inline_keyboard({
-#             'today_summary': 'Today',
-#             'yesterday_summary': 'Yesterday',
-#             'this_week_summary': 'This week',
-#             'calendar_summary': 'Pick a date',
-#         }))
-    
 @router.message(Command("settings"))
 async def settings_handler(message: types.Message, state: FSMContext):
     chats_keyboard = {"freq__24": "Каждые 24 часа", "freq__168": "Каждую неделю", "freq__72": "Каждые 3 дня"}
@@ -112,20 +101,12 @@ async def chats_handler_for_settings(callback: types.CallbackQuery, state: FSMCo
             "every": int(data['frequency']),
             "period": "hours",
         },
-
-        # "crontab": {
-        #     "minute": minutes,
-        #     "hour": hours,
-        #     "day_of_week": '*',
-        #     "day_of_month": '*',
-        #     "month_of_year": '*',
-        # },
         "start_time": start_time,
         "task": "celery.perform_summary_on_chat",
         "name": f"Resume for {callback.message.chat.id} about {data['chat_id']} created at {datetime.now()}"
     }
     await callback.answer()
-    response = await session.post_task_schedule(task_schedule_data)
+    await session.post_task_schedule(task_schedule_data)
     await callback.message.reply("Задача зарегистрирована")
     await state.clear()
     

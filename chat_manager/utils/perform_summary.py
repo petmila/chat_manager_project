@@ -14,7 +14,7 @@ def perform_summary(messages, chat_id):
     ]
     model = summarizer_llm_chain.Summarizer()
     result = model.interact(queryset)
-
+    result = ''.join(result.split('_'))
     return {
         'text': result,
         'date': datetime.date.today(), 'chat': chat_id
