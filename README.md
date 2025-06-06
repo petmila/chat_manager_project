@@ -69,7 +69,8 @@ docker-compose up --build
 Перейдите в браузере по адресу, чтобы прочитать документацию к проекту:
 
 ```
-http://localhost:8000/swagger/
+http://localhost:8000/api/schema/swagger-ui/
+http://localhost:8000/api/schema/redoc/
 ```
 
 ## Telegram-бот
