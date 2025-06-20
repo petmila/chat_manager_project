@@ -1,0 +1,5 @@
+mmpy_bot~=2.2.1
+pika
+aiohttp~=3.11.18
+aio_pika
+python-decouple~=3.8

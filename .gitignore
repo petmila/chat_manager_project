@@ -22,3 +22,6 @@ chat_manager/model-q4_K.gguf
 *.pgerd
 *.gguf
 *.env
+/.idea
+/mattermost_bot/.idea
+/mattermost_bot/mmbot/__pycache__
